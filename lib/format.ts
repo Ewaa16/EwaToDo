@@ -1,4 +1,5 @@
 import type { Priority } from "@/lib/db";
+import { jakartaParts, JAKARTA_TZ } from "@/lib/jakarta";
 
 export const PRIORITY_META: Record<
   Priority,
@@ -36,15 +37,13 @@ export function isOverdue(dueDate: string): boolean {
 }
 
 export function localDateNow(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  const t = jakartaParts();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${t.y}-${p(t.mo)}-${p(t.d)}`;
 }
 
 export function greetingByHour(): { text: string; emoji: string } {
-  const h = new Date().getHours();
+  const h = jakartaParts().h;
   if (h < 11) return { text: "Selamat pagi", emoji: "🌤️" };
   if (h < 15) return { text: "Selamat siang", emoji: "☀️" };
   if (h < 18) return { text: "Selamat sore", emoji: "🌇" };
@@ -52,10 +51,11 @@ export function greetingByHour(): { text: string; emoji: string } {
 }
 
 export function todayLabel(): string {
-  return new Date().toLocaleDateString("id-ID", {
+  return new Intl.DateTimeFormat("id-ID", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
-  });
+    timeZone: JAKARTA_TZ,
+  }).format(new Date());
 }

@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { deleteTaskAction, editTaskAction, toggleTaskAction } from "@/actions/tasks";
 import { TaskForm } from "@/components/TaskForm";
 import type { TaskRow } from "@/lib/db";
-import { PRIORITY_META, formatDateLocal, isOverdue } from "@/lib/format";
+import { PRIORITY_META, formatDateLocal, isOverdue, localDateNow } from "@/lib/format";
 
 export function TaskItem({
   task,
@@ -19,7 +19,7 @@ export function TaskItem({
 
   const completed = Boolean(task.completed);
   const overdue = task.due_date ? isOverdue(task.due_date) && !completed : false;
-  const dueToday = task.due_date && !completed && task.due_date === new Date().toISOString().slice(0, 10);
+  const dueToday = task.due_date && !completed && task.due_date === localDateNow();
 
   function toggle() {
     startTransition(() => toggleTaskAction(task.id, !completed));

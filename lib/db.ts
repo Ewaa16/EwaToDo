@@ -1,6 +1,7 @@
 import { createClient } from "@libsql/client";
 import fs from "fs";
 import path from "path";
+import { jakartaParts } from "@/lib/jakarta";
 
 export type Priority = "rendah" | "sedang" | "tinggi";
 
@@ -218,11 +219,9 @@ export async function updateTask(
 }
 
 function localNowString(): string {
-  const d = new Date();
+  const t = jakartaParts();
   const p = (n: number, w = 2) => String(n).padStart(w, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(
-    d.getHours()
-  )}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  return `${t.y}-${p(t.mo)}-${p(t.d)} ${p(t.h)}:${p(t.mi)}:${p(t.s)}`;
 }
 
 export async function setTaskCompleted(
@@ -376,10 +375,9 @@ export async function getWeeklyStats(
   days = 7
 ): Promise<DailyStat[]> {
   await initDb();
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - (days - 1));
-  const startStr = formatLocalDate(start);
+  const today = jakartaParts();
+  const startDate = new Date(Date.UTC(today.y, today.mo - 1, today.d - (days - 1)));
+  const startStr = formatLocalDate(startDate);
 
   const rows = await db.execute({
     sql: `SELECT substr(completed_at, 1, 10) AS date, COUNT(*) AS completed
@@ -397,12 +395,14 @@ export async function getWeeklyStats(
 
   const result: DailyStat[] = [];
   for (let i = 0; i < days; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
+    const d = new Date(Date.UTC(today.y, today.mo - 1, today.d - (days - 1) + i));
     const iso = formatLocalDate(d);
     result.push({
       date: iso,
-      label: d.toLocaleDateString("id-ID", { weekday: "short" }),
+      label: d.toLocaleDateString("id-ID", {
+        weekday: "short",
+        timeZone: "Asia/Jakarta",
+      }),
       completed: byDate.get(iso) ?? 0,
     });
   }
@@ -416,8 +416,7 @@ export function localToday(): string {
 }
 
 export function formatLocalDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  const t = jakartaParts(d);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${t.y}-${p(t.mo)}-${p(t.d)}`;
 }
