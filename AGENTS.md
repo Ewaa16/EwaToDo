@@ -13,7 +13,7 @@ Windows PowerShell blocks `npm.ps1`. Always run npm through cmd:
 - **DB**: `@libsql/client` (libSQL, SQLite fork). Prod memakai **Turso cloud** (`TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN`); dev lokal tanpa env tersebut memakai file `./data/local.db` (gitignored) via driver yang sama. Skema (`CREATE TABLE IF NOT EXISTS`) dijalankan `initDb()` di `lib/db.ts` — TLA, idempotent. Semua fungsi DB **async** (libSQL over HTTP di prod) — jangan dipakai tanpa `await`.
 - **Auth**: NextAuth v5 beta (`next-auth@beta`) with Google + Credentials (email/password). bcryptjs for hashing (pure JS — do not switch to native `bcrypt`).
 - **Routes**: `/login`, `/register` (auth group) · `/`, `/tasks`, `/stats` (`(app)` group).
-- **Auth env**: `AUTH_SECRET`, `AUTH_URL`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `TZ` in `.env.local` (gitignored; template in `.env.example`). Google OAuth callback: `/api/auth/callback/google`.
+- **Auth env**: `AUTH_SECRET`, `AUTH_URL`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN` in `.env.local` (gitignored; template in `.env.example`). Google OAuth callback: `/api/auth/callback/google`.
 
 ## Gotchas
 
@@ -22,7 +22,7 @@ Windows PowerShell blocks `npm.ps1`. Always run npm through cmd:
 - Use `auth()` in server components, never `getSession()` (Data Cache).
 - **Server actions used with `useActionState` must be `(prevState, formData) => Promise<{error?: string}>`.** `editTaskAction` is bound with `.bind(null, task.id)` in `TaskItem.tsx`.
 - All task queries in `lib/db.ts` are scoped by `user_id` — keep that when adding queries.
-- "Hari ini" / stats use server-local timezone via `lib/db.ts` `localToday()`; don't switch to UTC or dates will shift. Set env `TZ=Asia/Jakarta` (Vercel/VPS) so "hari ini" matches the user.
+- "Hari ini" / stats use **Asia/Jakarta explicitly** via `lib/jakarta.ts` (`jakartaParts()` → `Intl.DateTimeFormat` with `timeZone: "Asia/Jakarta"`), dipakai oleh `lib/db.ts` (`localToday`, `formatLocalDate`, `localNowString`, `getWeeklyStats`) dan `lib/format.ts` (`localDateNow`, `greetingByHour`, `todayLabel`). Do NOT rely on server-local time or env `TZ`: Vercel reserves the `TZ` env var and its functions always run UTC — hard-coded Jakarta is required so dates don't shift.
 
 ## Security & reliability (verified)
 
@@ -33,7 +33,7 @@ Windows PowerShell blocks `npm.ps1`. Always run npm through cmd:
 - **DB** di `lib/db.ts`: skema dibuat idempotent oleh `initDb()` (users, tasks + indeks, rate_limits; FK `tasks.user_id → users ON DELETE CASCADE`). Tidak ada backup file lokal (`VACUUM INTO` tidak berlaku untuk Turso remote) — andalkan **Turso Point-in-Time Restore** (1 hari di free tier).
 - Error pages: `app/error.tsx` (root boundary + retry), `app/global-error.tsx`, `app/not-found.tsx`. Server actions wrap DB calls in try/catch and return `{error}` instead of crashing.
 - **`npm audit` residual (known, no clean fix):** 3 "high" from `next`'s bundled `postcss`/`sharp`. Next is already latest (16.2.12); `npm audit fix --force` would wrongly downgrade to next@9 — do NOT run it. `sharp` is only exercised by `next/image` (unused here); postcss is build-time.
-- After deploy (Vercel): set `AUTH_URL=https://<proyek>.vercel.app`, regenerate `AUTH_SECRET`, tambah Google OAuth redirect URI `https://<proyek>.vercel.app/api/auth/callback/google`, ubah consent screen ke **Production** (scope profile/email tidak butuh verifikasi), set `TZ=Asia/Jakarta`, dan isi `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN`.
+- After deploy (Vercel): set `AUTH_URL=https://<proyek>.vercel.app`, regenerate `AUTH_SECRET`, tambah Google OAuth redirect URI `https://<proyek>.vercel.app/api/auth/callback/google`, ubah consent screen ke **Production** (scope profile/email tidak butuh verifikasi), dan isi `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN`. Jangan isi `TZ` — Vercel menolak (reserved) dan zona waktu sudah di-hard-code Asia/Jakarta di kode.
 
 ## Verification
 
