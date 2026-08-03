@@ -94,7 +94,6 @@ export default async function HomePage() {
   const categories = await getTaskCategories(userId);
 
   const { text, emoji } = greetingByHour();
-  const firstName = name.trim().split(" ")[0];
 
   const progress =
     summary.todayDue > 0
@@ -107,7 +106,7 @@ export default async function HomePage() {
       <section>
         <p className="text-sm font-medium text-indigo-600">{todayLabel()}</p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
-          {emoji} {text}, {firstName}!
+          {emoji} {text}, {name}!
         </h1>
         <p className="mt-2 text-slate-600">
           {summary.todayDue === 0
