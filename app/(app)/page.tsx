@@ -6,7 +6,6 @@ import { TaskItem } from "@/components/TaskItem";
 import {
   countDownloads,
   getDashboardSummary,
-  getTaskCategories,
   getTodayTasks,
   getUpcomingTasks,
 } from "@/lib/db";
@@ -47,14 +46,12 @@ export default async function HomePage() {
   const userId = Number(session!.user!.id);
   const name = session!.user!.name ?? "Teman";
 
-  const [summary, todayTasks, upcoming, categories, downloadCount] =
-    await Promise.all([
-      getDashboardSummary(userId),
-      getTodayTasks(userId),
-      getUpcomingTasks(userId, 3),
-      getTaskCategories(userId),
-      countDownloads(),
-    ]);
+  const [summary, todayTasks, upcoming, downloadCount] = await Promise.all([
+    getDashboardSummary(userId),
+    getTodayTasks(userId),
+    getUpcomingTasks(userId, 3),
+    countDownloads(),
+  ]);
 
   const { text, emoji } = greetingByHour();
 
@@ -173,7 +170,7 @@ export default async function HomePage() {
         ) : (
           <ul className="space-y-3">
             {todayTasks.map((task) => (
-              <TaskItem key={task.id} task={task} categories={categories} />
+              <TaskItem key={task.id} task={task} />
             ))}
           </ul>
         )}
@@ -196,7 +193,7 @@ export default async function HomePage() {
                     {task.title}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {task.category} · {task.priority}
+                    {task.priority}
                   </p>
                 </div>
                 <span

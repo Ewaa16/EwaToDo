@@ -8,10 +8,8 @@ import { PRIORITY_META, formatDateLocal, isOverdue, localDateNow } from "@/lib/f
 
 export function TaskItem({
   task,
-  categories = [],
 }: {
   task: TaskRow;
-  categories?: string[];
 }) {
   const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -46,12 +44,10 @@ export function TaskItem({
           initial={{
             title: task.title,
             description: task.description,
-            category: task.category,
             priority: task.priority,
             due_date: task.due_date,
           }}
           submitLabel="Simpan Perubahan"
-          categories={categories}
           onDone={() => setEditing(false)}
         />
       ) : (
@@ -95,11 +91,6 @@ export function TaskItem({
             )}
 
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              {task.category && (
-                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                  {task.category}
-                </span>
-              )}
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${PRIORITY_META[task.priority].badge}`}
               >

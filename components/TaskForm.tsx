@@ -12,12 +12,10 @@ type TaskFormProps = {
   initial?: {
     title: string;
     description?: string | null;
-    category: string;
     priority: Priority;
     due_date?: string | null;
   };
   submitLabel: string;
-  categories?: string[];
   onDone?: () => void;
   compact?: boolean;
 };
@@ -26,7 +24,6 @@ export function TaskForm({
   action,
   initial,
   submitLabel,
-  categories = [],
   onDone,
   compact,
 }: TaskFormProps) {
@@ -75,23 +72,7 @@ export function TaskForm({
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div>
-          <input
-            name="category"
-            type="text"
-            list="category-options"
-            maxLength={50}
-            placeholder="Kategori"
-            defaultValue={initial?.category ?? ""}
-            className={inputCls}
-          />
-          <datalist id="category-options">
-            {categories.map((c) => (
-              <option key={c} value={c} />
-            ))}
-          </datalist>
-        </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <select
             name="priority"

@@ -5,7 +5,7 @@ import { addTaskAction } from "@/actions/tasks";
 import { Filters } from "@/components/Filters";
 import { TaskForm } from "@/components/TaskForm";
 import { TaskItem } from "@/components/TaskItem";
-import { getTaskCategories, getTasks } from "@/lib/db";
+import { getTasks } from "@/lib/db";
 
 export const metadata: Metadata = { title: "Tugas" };
 
@@ -23,7 +23,6 @@ export default async function TasksPage({
   const status = VALID_STATUS.includes(params.status ?? "")
     ? params.status ?? ""
     : "";
-  const category = params.category ?? "";
   const priority = params.priority ?? "";
   const sort = ["due_date", "priority", "created_at"].includes(
     params.sort ?? ""
@@ -31,15 +30,11 @@ export default async function TasksPage({
     ? (params.sort as "due_date" | "priority" | "created_at")
     : "due_date";
 
-  const [categories, tasks] = await Promise.all([
-    getTaskCategories(userId),
-    getTasks(userId, {
-      status: (status || undefined) as "aktif" | "selesai" | undefined,
-      category: category || undefined,
-      priority: priority || undefined,
-      sort,
-    }),
-  ]);
+  const tasks = await getTasks(userId, {
+    status: (status || undefined) as "aktif" | "selesai" | undefined,
+    priority: priority || undefined,
+    sort,
+  });
 
   return (
     <div className="space-y-6">
@@ -54,11 +49,11 @@ export default async function TasksPage({
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="mb-4 font-semibold text-slate-900">➕ Tambah tugas baru</h2>
-        <TaskForm action={addTaskAction} submitLabel="Tambah Tugas" categories={categories} />
+        <TaskForm action={addTaskAction} submitLabel="Tambah Tugas" />
       </section>
 
       <Suspense>
-        <Filters categories={categories} current={{ status, category, priority, sort }} />
+        <Filters current={{ status, priority, sort }} />
       </Suspense>
 
       {tasks.length === 0 ? (
@@ -80,7 +75,7 @@ export default async function TasksPage({
       ) : (
         <ul className="space-y-3">
           {tasks.map((task) => (
-            <TaskItem key={task.id} task={task} categories={categories} />
+            <TaskItem key={task.id} task={task} />
           ))}
         </ul>
       )}

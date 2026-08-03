@@ -21,7 +21,6 @@ export interface TaskRow {
   user_id: number;
   title: string;
   description: string | null;
-  category: string;
   priority: Priority;
   due_date: string | null;
   completed: number;
@@ -41,7 +40,6 @@ export interface DownloadRow {
 
 export type TaskFilter = {
   status?: "semua" | "aktif" | "selesai";
-  category?: string;
   priority?: string;
   sort?: "due_date" | "created_at" | "priority";
 };
@@ -74,7 +72,6 @@ const SCHEMA = `
     user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title        TEXT NOT NULL,
     description  TEXT,
-    category     TEXT NOT NULL DEFAULT '',
     priority     TEXT NOT NULL DEFAULT 'sedang' CHECK (priority IN ('rendah','sedang','tinggi')),
     due_date     TEXT,
     completed    INTEGER NOT NULL DEFAULT 0,
@@ -176,7 +173,6 @@ export async function upsertGoogleUser(data: {
 export type NewTask = {
   title: string;
   description?: string | null;
-  category?: string;
   priority?: Priority;
   due_date?: string | null;
 };
@@ -187,13 +183,12 @@ export async function createTask(
 ): Promise<TaskRow> {
   await initDb();
   const info = await db.execute({
-    sql: `INSERT INTO tasks (user_id, title, description, category, priority, due_date)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO tasks (user_id, title, description, priority, due_date)
+       VALUES (?, ?, ?, ?, ?)`,
     args: [
       userId,
       data.title,
       data.description ?? null,
-      data.category ?? "",
       data.priority ?? "sedang",
       data.due_date || null,
     ],
@@ -222,12 +217,11 @@ export async function updateTask(
   const current = await getTaskById(id, userId);
   if (!current) return undefined;
   await db.execute({
-    sql: `UPDATE tasks SET title = ?, description = ?, category = ?, priority = ?, due_date = ?
+    sql: `UPDATE tasks SET title = ?, description = ?, priority = ?, due_date = ?
      WHERE id = ? AND user_id = ?`,
     args: [
       data.title ?? current.title,
       data.description !== undefined ? data.description : current.description,
-      data.category ?? current.category,
       data.priority ?? current.priority,
       data.due_date !== undefined ? data.due_date : current.due_date,
       id,
@@ -280,10 +274,6 @@ const TASK_FILTER_SQL = (
   } else if (f.status === "selesai") {
     clauses.push("completed = 1");
   }
-  if (f.category) {
-    clauses.push("category = ?");
-    params.push(f.category);
-  }
   if (f.priority) {
     clauses.push("priority = ?");
     params.push(f.priority);
@@ -309,15 +299,6 @@ export async function getTasks(
     args: [userId, ...params],
   });
   return r.rows as unknown as TaskRow[];
-}
-
-export async function getTaskCategories(userId: number): Promise<string[]> {
-  await initDb();
-  const r = await db.execute({
-    sql: "SELECT DISTINCT category FROM tasks WHERE user_id = ? AND category != '' ORDER BY category ASC",
-    args: [userId],
-  });
-  return r.rows.map((row) => row.category as string);
 }
 
 export async function getTodayTasks(userId: number): Promise<TaskRow[]> {
