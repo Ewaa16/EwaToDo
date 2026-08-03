@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Navbar } from "@/components/Navbar";
+import { VisitTracker } from "@/components/VisitTracker";
+import { OWNER_EMAIL } from "@/lib/owner";
 
 export default async function AppLayout({
   children,
@@ -13,6 +15,8 @@ export default async function AppLayout({
     redirect("/login");
   }
 
+  const isOwner = user.email === OWNER_EMAIL;
+
   return (
     <div className="relative flex min-h-full flex-col overflow-hidden">
       <div
@@ -24,8 +28,10 @@ export default async function AppLayout({
         <div className="absolute -bottom-24 left-1/4 h-72 w-72 rounded-full bg-sky-200/25 blur-3xl dark:bg-sky-600/10" />
       </div>
       <div className="relative z-10 flex min-h-full flex-col">
+        <VisitTracker />
         <Navbar
           user={{ name: user.name, email: user.email, image: user.image }}
+          isOwner={isOwner}
         />
         <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-28 pt-8 md:pb-8">
           {children}

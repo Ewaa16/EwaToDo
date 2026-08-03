@@ -38,6 +38,18 @@ export interface DownloadRow {
   created_at: string;
 }
 
+export interface VisitRow {
+  id: number;
+  user_id: number;
+  path: string;
+  referrer: string | null;
+  ip: string | null;
+  user_agent: string | null;
+  created_at: string;
+  name: string | null;
+  email: string | null;
+}
+
 export type TaskFilter = {
   status?: "semua" | "aktif" | "selesai";
   priority?: string;
@@ -95,6 +107,19 @@ const SCHEMA = `
     user_agent TEXT,
     created_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS visits (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    path       TEXT NOT NULL,
+    referrer   TEXT,
+    ip         TEXT,
+    user_agent TEXT,
+    created_at TEXT NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_visits_created ON visits(created_at);
+  CREATE INDEX IF NOT EXISTS idx_visits_user ON visits(user_id);
 `;
 
 // Lazy, sekali per proses (createClient file lokal tidak suka DDL bersamaan dari
@@ -486,6 +511,79 @@ export async function getRecentDownloads(limit = 20): Promise<DownloadRow[]> {
   });
   return r.rows as unknown as DownloadRow[];
 }
+
+// ---- visits ----
+
+export async function recordVisit(data: {
+  userId: number;
+  path: string;
+  referrer?: string | null;
+  ip?: string | null;
+  userAgent?: string | null;
+}): Promise<void> {
+  await initDb();
+  await db.execute({
+    sql: "INSERT INTO visits (user_id, path, referrer, ip, user_agent, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+    args: [
+      data.userId,
+      data.path,
+      data.referrer ?? null,
+      data.ip ?? null,
+      data.userAgent ?? null,
+      localNowString(),
+    ],
+  });
+}
+
+export async function getRecentVisits(limit = 20): Promise<VisitRow[]> {
+  await initDb();
+  const r = await db.execute({
+    sql: `SELECT v.id, v.user_id, v.path, v.referrer, v.ip, v.user_agent, v.created_at, u.name, u.email
+       FROM visits v
+       LEFT JOIN users u ON u.id = v.user_id
+       ORDER BY v.id DESC
+       LIMIT ?`,
+    args: [limit],
+  });
+  return r.rows as unknown as VisitRow[];
+}
+
+// Hitungan publik owner — aman di-cache global, hindari hit DB tiap render.
+export const countVisits = unstable_cache(
+  async (since?: string): Promise<number> => {
+    await initDb();
+    const r = since
+      ? await db.execute({
+          sql: "SELECT COUNT(*) AS c FROM visits WHERE substr(created_at, 1, 10) >= ?",
+          args: [since],
+        })
+      : await db.execute({
+          sql: "SELECT COUNT(*) AS c FROM visits",
+          args: [],
+        });
+    return Number((r.rows[0] as unknown as { c: number }).c ?? 0);
+  },
+  ["visits-count"],
+  { revalidate: 60 }
+);
+
+export const countUniqueVisitors = unstable_cache(
+  async (since?: string): Promise<number> => {
+    await initDb();
+    const r = since
+      ? await db.execute({
+          sql: "SELECT COUNT(DISTINCT user_id) AS c FROM visits WHERE substr(created_at, 1, 10) >= ?",
+          args: [since],
+        })
+      : await db.execute({
+          sql: "SELECT COUNT(DISTINCT user_id) AS c FROM visits",
+          args: [],
+        });
+    return Number((r.rows[0] as unknown as { c: number }).c ?? 0);
+  },
+  ["visits-unique"],
+  { revalidate: 60 }
+);
 
 // ---- helpers ----
 

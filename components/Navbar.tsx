@@ -69,18 +69,41 @@ const NAV_ITEMS = [
   },
 ];
 
+const AUDIENCE_ITEM = {
+  href: "/audience",
+  label: "Audiens",
+  icon: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  ),
+};
+
 type NavbarProps = {
   user: { name?: string | null; email?: string | null; image?: string | null };
+  isOwner?: boolean;
 };
 
 function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-export function Navbar({ user }: NavbarProps) {
+export function Navbar({ user, isOwner }: NavbarProps) {
   const pathname = usePathname();
   const [imgError, setImgError] = useState(false);
   const initial = (user.name ?? user.email ?? "?").charAt(0).toUpperCase();
+  const items = isOwner ? [...NAV_ITEMS, AUDIENCE_ITEM] : NAV_ITEMS;
 
   return (
     <>
@@ -91,7 +114,7 @@ export function Navbar({ user }: NavbarProps) {
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex">
-            {NAV_ITEMS.map((item) => {
+            {items.map((item) => {
               const active = isActive(pathname, item.href);
               return (
                 <Link
@@ -143,8 +166,10 @@ export function Navbar({ user }: NavbarProps) {
       </header>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 md:hidden">
-        <div className="mx-auto grid max-w-3xl grid-cols-3">
-          {NAV_ITEMS.map((item) => {
+        <div
+          className={`mx-auto grid max-w-3xl ${isOwner ? "grid-cols-4" : "grid-cols-3"}`}
+        >
+          {items.map((item) => {
             const active = isActive(pathname, item.href);
             return (
               <Link
