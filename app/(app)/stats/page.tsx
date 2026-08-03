@@ -28,17 +28,16 @@ export default async function StatsPage() {
   const userId = Number(session!.user!.id);
   const isOwner = session!.user!.email === OWNER_EMAIL;
 
-  const stats = await getWeeklyStats(userId, 7);
-  const summary = await getDashboardSummary(userId);
-
-  let downloadCount = 0;
-  let recentDownloads: DownloadRow[] = [];
-  if (isOwner) {
-    [downloadCount, recentDownloads] = await Promise.all([
-      countDownloads(),
-      getRecentDownloads(20),
-    ]);
-  }
+  const statsPromise = getWeeklyStats(userId, 7);
+  const summaryPromise = getDashboardSummary(userId);
+  const downloadsPromise = isOwner
+    ? Promise.all([countDownloads(), getRecentDownloads(20)])
+    : Promise.resolve([0, []] as [number, DownloadRow[]]);
+  const [stats, summary, [downloadCount, recentDownloads]] = await Promise.all([
+    statsPromise,
+    summaryPromise,
+    downloadsPromise,
+  ]);
 
   const weekTotal = stats.reduce((sum, d) => sum + d.completed, 0);
   const best = [...stats].sort((a, b) => b.completed - a.completed)[0];

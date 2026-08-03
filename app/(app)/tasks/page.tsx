@@ -31,13 +31,15 @@ export default async function TasksPage({
     ? (params.sort as "due_date" | "priority" | "created_at")
     : "due_date";
 
-  const categories = await getTaskCategories(userId);
-  const tasks = await getTasks(userId, {
-    status: (status || undefined) as "aktif" | "selesai" | undefined,
-    category: category || undefined,
-    priority: priority || undefined,
-    sort,
-  });
+  const [categories, tasks] = await Promise.all([
+    getTaskCategories(userId),
+    getTasks(userId, {
+      status: (status || undefined) as "aktif" | "selesai" | undefined,
+      category: category || undefined,
+      priority: priority || undefined,
+      sort,
+    }),
+  ]);
 
   return (
     <div className="space-y-6">

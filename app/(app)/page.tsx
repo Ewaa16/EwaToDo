@@ -47,11 +47,14 @@ export default async function HomePage() {
   const userId = Number(session!.user!.id);
   const name = session!.user!.name ?? "Teman";
 
-  const summary = await getDashboardSummary(userId);
-  const todayTasks = await getTodayTasks(userId);
-  const upcoming = await getUpcomingTasks(userId, 3);
-  const categories = await getTaskCategories(userId);
-  const downloadCount = await countDownloads();
+  const [summary, todayTasks, upcoming, categories, downloadCount] =
+    await Promise.all([
+      getDashboardSummary(userId),
+      getTodayTasks(userId),
+      getUpcomingTasks(userId, 3),
+      getTaskCategories(userId),
+      countDownloads(),
+    ]);
 
   const { text, emoji } = greetingByHour();
 

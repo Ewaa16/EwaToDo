@@ -1,4 +1,5 @@
 import { createClient } from "@libsql/client";
+import { unstable_cache } from "next/cache";
 import fs from "fs";
 import path from "path";
 import { jakartaParts } from "@/lib/jakarta";
@@ -361,28 +362,25 @@ export async function getDashboardSummary(
 ): Promise<DashboardSummary> {
   await initDb();
   const today = localToday();
-  const todayDue = await db.execute({
-    sql: "SELECT COUNT(*) AS c FROM tasks WHERE user_id = ? AND due_date = ?",
-    args: [userId, today],
+  const r = await db.execute({
+    sql: `SELECT
+        (SELECT COUNT(*) FROM tasks WHERE user_id = ? AND due_date = ?) AS todayDue,
+        (SELECT COUNT(*) FROM tasks WHERE user_id = ? AND completed = 1 AND substr(completed_at, 1, 10) = ?) AS todayCompleted,
+        (SELECT COUNT(*) FROM tasks WHERE user_id = ? AND completed = 0) AS activeTotal,
+        (SELECT COUNT(*) FROM tasks WHERE user_id = ? AND completed = 1) AS completedTotal`,
+    args: [userId, today, userId, today, userId, userId],
   });
-  const todayCompleted = await db.execute({
-    sql: "SELECT COUNT(*) AS c FROM tasks WHERE user_id = ? AND completed = 1 AND substr(completed_at, 1, 10) = ?",
-    args: [userId, today],
-  });
-  const activeTotal = await db.execute({
-    sql: "SELECT COUNT(*) AS c FROM tasks WHERE user_id = ? AND completed = 0",
-    args: [userId],
-  });
-  const completedTotal = await db.execute({
-    sql: "SELECT COUNT(*) AS c FROM tasks WHERE user_id = ? AND completed = 1",
-    args: [userId],
-  });
-  const asNum = (r: { c: number }) => Number(r.c ?? 0);
+  const row = r.rows[0] as unknown as {
+    todayDue: number;
+    todayCompleted: number;
+    activeTotal: number;
+    completedTotal: number;
+  };
   return {
-    todayDue: asNum(todayDue.rows[0] as unknown as { c: number }),
-    todayCompleted: asNum(todayCompleted.rows[0] as unknown as { c: number }),
-    activeTotal: asNum(activeTotal.rows[0] as unknown as { c: number }),
-    completedTotal: asNum(completedTotal.rows[0] as unknown as { c: number }),
+    todayDue: Number(row.todayDue ?? 0),
+    todayCompleted: Number(row.todayCompleted ?? 0),
+    activeTotal: Number(row.activeTotal ?? 0),
+    completedTotal: Number(row.completedTotal ?? 0),
   };
 }
 
@@ -446,14 +444,19 @@ export async function recordDownload(data: {
   });
 }
 
-export async function countDownloads(): Promise<number> {
-  await initDb();
-  const r = await db.execute({
-    sql: "SELECT COUNT(*) AS c FROM downloads",
-    args: [],
-  });
-  return Number((r.rows[0] as unknown as { c: number }).c ?? 0);
-}
+// Count publik (bukan per-user) — aman di-cache global, hindari hit DB tiap render.
+export const countDownloads = unstable_cache(
+  async (): Promise<number> => {
+    await initDb();
+    const r = await db.execute({
+      sql: "SELECT COUNT(*) AS c FROM downloads",
+      args: [],
+    });
+    return Number((r.rows[0] as unknown as { c: number }).c ?? 0);
+  },
+  ["downloads-count"],
+  { revalidate: 600 }
+);
 
 export async function getRecentDownloads(limit = 20): Promise<DownloadRow[]> {
   await initDb();
