@@ -13,6 +13,7 @@ export function InstallApp() {
   const [installed, setInstalled] = useState(false);
   const [installFailed, setInstallFailed] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [isAndroid, setIsAndroid] = useState(false);
   const [standalone, setStandalone] = useState(false);
   const [showManual, setShowManual] = useState(false);
 
@@ -20,6 +21,7 @@ export function InstallApp() {
     const timer = setTimeout(() => {
       setStandalone(window.matchMedia("(display-mode: standalone)").matches);
       setIsIOS(/iphone|ipad|ipod/i.test(navigator.userAgent));
+      setIsAndroid(/android/i.test(navigator.userAgent));
     }, 0);
 
     function onBeforeInstall(e: Event) {
@@ -75,7 +77,7 @@ export function InstallApp() {
   }
 
   if (standalone) return null;
-  if (!promptEvent && !isIOS) return null;
+  if (!promptEvent && !isIOS && !isAndroid) return null;
 
   return (
     <section className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-50 p-5 shadow-sm">
@@ -152,6 +154,39 @@ export function InstallApp() {
             “Tambah”.
           </li>
         </ol>
+      )}
+
+      {isAndroid && (
+        <div className="mt-4 border-t border-indigo-100 pt-4">
+          <p className="text-sm font-semibold text-slate-800">
+            Atau unduh sebagai file (Android):
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            Tombol di bawah mengunduh file installer (APK). Setelah terunduh,
+            buka filenya lalu izinkan Chrome menginstal dari “sumber tidak
+            dikenal”.
+          </p>
+          <a
+            href="/EwaToDo.apk"
+            download="EwaToDo.apk"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <path d="m7 10 5 5 5-5" />
+              <path d="M12 15V3" />
+            </svg>
+            Download APK Android
+          </a>
+        </div>
       )}
     </section>
   );
