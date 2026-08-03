@@ -26,7 +26,7 @@ const taskSchema = z.object({
     .max(2000, "Deskripsi maksimal 2000 karakter")
     .nullable()
     .optional(),
-  category: z.string().trim().max(50).optional().default("Umum"),
+  category: z.string().trim().max(50).optional().default(""),
   priority: z
     .enum(["rendah", "sedang", "tinggi"])
     .optional()
@@ -53,7 +53,7 @@ function parseTask(formData: FormData) {
   return taskSchema.safeParse({
     title: String(formData.get("title") ?? ""),
     description: formData.get("description") || null,
-    category: String(formData.get("category") || "Umum"),
+    category: String(formData.get("category") || ""),
     priority: String(formData.get("priority") || "sedang"),
     due_date: String(formData.get("due_date") || "") || null,
   });

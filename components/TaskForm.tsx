@@ -83,7 +83,7 @@ export function TaskForm({
             list="category-options"
             maxLength={50}
             placeholder="Kategori"
-            defaultValue={initial?.category ?? "Umum"}
+            defaultValue={initial?.category ?? ""}
             className={inputCls}
           />
           <datalist id="category-options">

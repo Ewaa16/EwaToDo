@@ -74,7 +74,7 @@ const SCHEMA = `
     user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title        TEXT NOT NULL,
     description  TEXT,
-    category     TEXT NOT NULL DEFAULT 'Umum',
+    category     TEXT NOT NULL DEFAULT '',
     priority     TEXT NOT NULL DEFAULT 'sedang' CHECK (priority IN ('rendah','sedang','tinggi')),
     due_date     TEXT,
     completed    INTEGER NOT NULL DEFAULT 0,
@@ -193,7 +193,7 @@ export async function createTask(
       userId,
       data.title,
       data.description ?? null,
-      data.category || "Umum",
+      data.category ?? "",
       data.priority ?? "sedang",
       data.due_date || null,
     ],
@@ -314,7 +314,7 @@ export async function getTasks(
 export async function getTaskCategories(userId: number): Promise<string[]> {
   await initDb();
   const r = await db.execute({
-    sql: "SELECT DISTINCT category FROM tasks WHERE user_id = ? ORDER BY category ASC",
+    sql: "SELECT DISTINCT category FROM tasks WHERE user_id = ? AND category != '' ORDER BY category ASC",
     args: [userId],
   });
   return r.rows.map((row) => row.category as string);
