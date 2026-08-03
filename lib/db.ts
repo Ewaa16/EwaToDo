@@ -38,16 +38,15 @@ export interface DownloadRow {
   created_at: string;
 }
 
-export interface VisitRow {
+export interface AudienceUserRow {
   id: number;
-  user_id: number;
-  path: string;
-  referrer: string | null;
-  ip: string | null;
-  user_agent: string | null;
-  created_at: string;
   name: string | null;
-  email: string | null;
+  email: string;
+  provider: string;
+  created_at: string;
+  first_seen: string | null;
+  last_seen: string | null;
+  visit_count: number;
 }
 
 export type TaskFilter = {
@@ -535,37 +534,23 @@ export async function recordVisit(data: {
   });
 }
 
-export async function getRecentVisits(limit = 20): Promise<VisitRow[]> {
+// Orang yang login (punya minimal satu kunjungan), bukan daftar aktivitas.
+export async function getAudienceUsers(limit = 50): Promise<AudienceUserRow[]> {
   await initDb();
   const r = await db.execute({
-    sql: `SELECT v.id, v.user_id, v.path, v.referrer, v.ip, v.user_agent, v.created_at, u.name, u.email
-       FROM visits v
-       LEFT JOIN users u ON u.id = v.user_id
-       ORDER BY v.id DESC
+    sql: `SELECT u.id, u.name, u.email, u.provider, u.created_at,
+                MIN(v.created_at) AS first_seen,
+                MAX(v.created_at) AS last_seen,
+                COUNT(v.id) AS visit_count
+       FROM users u
+       INNER JOIN visits v ON v.user_id = u.id
+       GROUP BY u.id
+       ORDER BY last_seen DESC
        LIMIT ?`,
     args: [limit],
   });
-  return r.rows as unknown as VisitRow[];
+  return r.rows as unknown as AudienceUserRow[];
 }
-
-// Hitungan publik owner — aman di-cache global, hindari hit DB tiap render.
-export const countVisits = unstable_cache(
-  async (since?: string): Promise<number> => {
-    await initDb();
-    const r = since
-      ? await db.execute({
-          sql: "SELECT COUNT(*) AS c FROM visits WHERE substr(created_at, 1, 10) >= ?",
-          args: [since],
-        })
-      : await db.execute({
-          sql: "SELECT COUNT(*) AS c FROM visits",
-          args: [],
-        });
-    return Number((r.rows[0] as unknown as { c: number }).c ?? 0);
-  },
-  ["visits-count"],
-  { revalidate: 60 }
-);
 
 export const countUniqueVisitors = unstable_cache(
   async (since?: string): Promise<number> => {

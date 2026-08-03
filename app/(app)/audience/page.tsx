@@ -5,10 +5,8 @@ import { OWNER_EMAIL } from "@/lib/owner";
 import {
   countDownloads,
   countUniqueVisitors,
-  countVisits,
+  getAudienceUsers,
   getRecentDownloads,
-  getRecentVisits,
-  localToday,
 } from "@/lib/db";
 
 export const metadata: Metadata = { title: "Audiens" };
@@ -46,28 +44,21 @@ export default async function AudiencePage() {
     redirect("/");
   }
 
-  const today = localToday();
-  const [
-    downloadCount,
-    recentDownloads,
-    visitCount,
-    uniqueVisitors,
-    todayVisits,
-    recentVisits,
-  ] = await Promise.all([
-    countDownloads(),
-    getRecentDownloads(20),
-    countVisits(),
-    countUniqueVisitors(),
-    countVisits(today),
-    getRecentVisits(20),
-  ]);
+  const [downloadCount, recentDownloads, uniqueVisitors, audienceUsers] =
+    await Promise.all([
+      countDownloads(),
+      getRecentDownloads(20),
+      countUniqueVisitors(),
+      getAudienceUsers(50),
+    ]);
 
   const cards = [
     { label: "Total unduhan APK", value: downloadCount, sub: "sepanjang waktu" },
-    { label: "Total kunjungan", value: visitCount, sub: "sepanjang waktu" },
-    { label: "Pengunjung unik", value: uniqueVisitors, sub: "berdasarkan user" },
-    { label: "Kunjungan hari ini", value: todayVisits, sub: "Asia/Jakarta" },
+    {
+      label: "Jumlah orang yang login",
+      value: uniqueVisitors,
+      sub: "pengguna terdaftar",
+    },
   ];
 
   return (
@@ -77,11 +68,11 @@ export default async function AudiencePage() {
           👥 Audiens
         </h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
-          Ringkasan pengunjung web dan unduhan APK.
+          Orang yang login ke web dan unduhan APK.
         </p>
       </div>
 
-      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {cards.map((card) => (
           <div
             key={card.label}
@@ -138,43 +129,42 @@ export default async function AudiencePage() {
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-slate-900 dark:text-white">
-            👀 Kunjungan Web
+            👥 Orang yang login
           </h2>
           <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-            {visitCount} kunjungan
+            {uniqueVisitors} orang
           </span>
         </div>
-        {recentVisits.length === 0 ? (
+        {audienceUsers.length === 0 ? (
           <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            Belum ada kunjungan tercatat.
+            Belum ada orang yang login tercatat.
           </p>
         ) : (
           <ul className="mt-3 divide-y divide-slate-100 dark:divide-slate-800">
-            {recentVisits.map((v) => (
-              <li key={v.id} className="py-2.5 text-sm">
+            {audienceUsers.map((u) => (
+              <li key={u.id} className="py-2.5 text-sm">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="truncate font-medium text-slate-800 dark:text-slate-200">
-                    {v.name ?? "Pengguna"}
-                    {v.email && (
-                      <span className="ml-1 text-xs font-normal text-slate-400 dark:text-slate-500">
-                        {v.email}
-                      </span>
-                    )}
-                  </p>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <p className="truncate font-medium text-slate-800 dark:text-slate-200">
+                      {u.name ?? "Tanpa nama"}
+                    </p>
+                    <span
+                      className={`flex-none rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                        u.provider === "google"
+                          ? "bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400"
+                          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                      }`}
+                    >
+                      {u.provider === "google" ? "Google" : "Email"}
+                    </span>
+                  </div>
                   <span className="flex-none text-xs text-slate-400 dark:text-slate-500">
-                    {formatWaktu(v.created_at)}
+                    aktif {formatWaktu(u.last_seen ?? "")}
                   </span>
                 </div>
-                <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  <span className="rounded-md bg-indigo-50 px-1.5 py-0.5 font-medium text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
-                    {v.path}
-                  </span>
-                  <span>{deviceLabel(v.user_agent)}</span>
-                  {v.ip && <span>· {v.ip}</span>}
-                  {v.referrer && (
-                    <span className="max-w-[12rem] truncate">· dari {v.referrer}</span>
-                  )}
-                </div>
+                <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                  {u.email} · sejak {formatWaktu(u.first_seen ?? "")}
+                </p>
               </li>
             ))}
           </ul>
