@@ -15,7 +15,7 @@ const PIECES = Array.from({ length: 40 }, (_, i) => ({
   rotate: (i * 47) % 360,
 }));
 
-export function Confetti({ show }: { show: boolean }) {
+export function Confetti({ show = true }: { show?: boolean }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

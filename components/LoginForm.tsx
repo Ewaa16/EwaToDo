@@ -1,12 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { loginAction, loginGoogleAction } from "@/actions/auth";
 import { Logo } from "@/components/Logo";
 
+const CONFETTI_KEY = "ewatodo-confetti-once";
+
 export function LoginForm({ isNew = false }: { isNew?: boolean }) {
   const [state, formAction, pending] = useActionState(loginAction, {});
+
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem(CONFETTI_KEY);
+    } catch {
+      // abaikan
+    }
+  }, []);
 
   const inputCls =
     "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/30";

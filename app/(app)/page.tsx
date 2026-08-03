@@ -70,9 +70,7 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <Confetti
-        show={summary.todayDue > 0 && summary.todayCompleted === summary.todayDue}
-      />
+      <Confetti />
 
       {/* Sapaan */}
       <section>
