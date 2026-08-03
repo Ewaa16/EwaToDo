@@ -84,7 +84,7 @@ export function Navbar({ user }: NavbarProps) {
   return (
     <>
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/85 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3">
           <Link href="/" aria-label="Beranda">
             <Logo size="sm" />
           </Link>
@@ -141,7 +141,7 @@ export function Navbar({ user }: NavbarProps) {
       </header>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
-        <div className="mx-auto grid max-w-5xl grid-cols-3">
+        <div className="mx-auto grid max-w-3xl grid-cols-3">
           {NAV_ITEMS.map((item) => {
             const active = isActive(pathname, item.href);
             return (

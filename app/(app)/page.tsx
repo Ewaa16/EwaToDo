@@ -27,60 +27,16 @@ function StatCard({
   icon: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-slate-500">{label}</p>
-        <span className="text-lg" aria-hidden="true">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-medium text-slate-500">{label}</p>
+        <span className="text-base" aria-hidden="true">
           {icon}
         </span>
       </div>
-      <p className="mt-1 text-3xl font-bold text-slate-900">{value}</p>
-      <p className="mt-1 text-xs text-slate-400">{hint}</p>
+      <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
+      <p className="mt-0.5 text-[11px] text-slate-400">{hint}</p>
     </div>
-  );
-}
-
-function FeatureButton({
-  href,
-  emoji,
-  title,
-  desc,
-  gradient,
-}: {
-  href: string;
-  emoji: string;
-  title: string;
-  desc: string;
-  gradient: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`group flex flex-col justify-between rounded-2xl bg-gradient-to-br ${gradient} p-6 text-white shadow-md transition-transform hover:-translate-y-0.5`}
-    >
-      <span className="text-3xl" aria-hidden="true">
-        {emoji}
-      </span>
-      <div className="mt-4">
-        <p className="text-lg font-bold">{title}</p>
-        <p className="mt-0.5 text-sm text-white/85">{desc}</p>
-      </div>
-      <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-white/90 transition-colors group-hover:text-white">
-        Buka halaman
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
-        >
-          <path d="M5 12h14" />
-          <path d="m12 5 7 7-7 7" />
-        </svg>
-      </span>
-    </Link>
   );
 }
 
@@ -108,7 +64,7 @@ export default async function HomePage() {
         <p className="text-sm font-medium text-indigo-600">
           {todayLabel()} · <RealtimeClock />
         </p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           {emoji} {text}, {name}!
         </h1>
         <p className="mt-2 text-slate-600">
@@ -160,29 +116,26 @@ export default async function HomePage() {
         </p>
       </section>
 
-      {/* Tombol fitur */}
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <FeatureButton
+      {/* Aksi utama — desktop */}
+      <section className="hidden md:block">
+        <Link
           href="/tasks"
-          emoji="➕"
-          title="Tambah Tugas"
-          desc="Tulis tugas baru dengan kategori, prioritas & deadline"
-          gradient="from-indigo-500 to-violet-600"
-        />
-        <FeatureButton
-          href="/tasks"
-          emoji="📋"
-          title="Semua Tugas"
-          desc="Lihat, edit, dan kelola seluruh daftar tugasmu"
-          gradient="from-sky-500 to-blue-600"
-        />
-        <FeatureButton
-          href="/stats"
-          emoji="📊"
-          title="Statistik"
-          desc="Pantau produktivitasmu dalam 7 hari terakhir"
-          gradient="from-emerald-500 to-teal-600"
-        />
+          className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 px-5 py-4 text-base font-semibold text-white shadow-md shadow-indigo-500/30 transition-colors hover:from-indigo-600 hover:to-violet-700"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-5 w-5"
+          >
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          Tambah Tugas Baru
+        </Link>
       </section>
 
       {/* Tugas hari ini */}
@@ -251,6 +204,26 @@ export default async function HomePage() {
           </ul>
         </section>
       )}
+
+      {/* FAB — mobile */}
+      <Link
+        href="/tasks"
+        aria-label="Tambah Tugas Baru"
+        className="fixed bottom-24 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/40 transition-transform active:scale-95 md:hidden"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-6 w-6"
+        >
+          <path d="M12 5v14" />
+          <path d="M5 12h14" />
+        </svg>
+      </Link>
     </div>
   );
 }

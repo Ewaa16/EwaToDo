@@ -18,7 +18,7 @@ export default async function AppLayout({
       <Navbar
         user={{ name: user.name, email: user.email, image: user.image }}
       />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-8 md:pb-8">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-28 pt-8 md:pb-8">
         {children}
       </main>
       <footer className="hidden border-t border-slate-200 py-6 md:block">
