@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/auth";
+import { RealtimeClock } from "@/components/RealtimeClock";
 import { TaskItem } from "@/components/TaskItem";
 import {
   getDashboardSummary,
@@ -104,7 +105,9 @@ export default async function HomePage() {
     <div className="space-y-8">
       {/* Sapaan */}
       <section>
-        <p className="text-sm font-medium text-indigo-600">{todayLabel()}</p>
+        <p className="text-sm font-medium text-indigo-600">
+          {todayLabel()} · <RealtimeClock />
+        </p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
           {emoji} {text}, {name}!
         </h1>
