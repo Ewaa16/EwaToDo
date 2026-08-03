@@ -41,7 +41,7 @@ tunnel*.log
 
 # android signing (jangan commit: berisi keystore & password)
 *.keystore
-"EwaToDo - Google Play package.zip"
+EwaToDo - Google Play package.zip
 
 # vercel
 .vercel
