@@ -10,7 +10,7 @@ type BeforeInstallPromptEvent = Event & {
 const IN_APP_BROWSER_UA =
   /WhatsApp|Instagram|FBAV|FBAN|FBIOS|FB_IAB|Messenger|Telegram|MicroMessenger|TikTok|Twitter|GoogleApp|GSA|Snapchat|Line\//i;
 
-export function InstallApp() {
+export function InstallApp({ downloadCount = 0 }: { downloadCount?: number }) {
   const [promptEvent, setPromptEvent] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
@@ -251,8 +251,13 @@ export function InstallApp() {
             buka filenya lalu izinkan Chrome menginstal dari “sumber tidak
             dikenal”.
           </p>
+          {downloadCount > 0 && (
+            <p className="mt-1 text-xs font-medium text-indigo-600">
+              📥 Sudah diunduh {downloadCount} kali.
+            </p>
+          )}
           <a
-            href="/EwaToDo.apk"
+            href="/api/apk-download"
             download="EwaToDo.apk"
             className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50"
           >

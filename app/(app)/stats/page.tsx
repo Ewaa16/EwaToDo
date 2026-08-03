@@ -1,16 +1,44 @@
 import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { StatsChart } from "@/components/StatsChart";
-import { getDashboardSummary, getWeeklyStats } from "@/lib/db";
+import {
+  countDownloads,
+  getDashboardSummary,
+  getRecentDownloads,
+  getWeeklyStats,
+  type DownloadRow,
+} from "@/lib/db";
 
 export const metadata: Metadata = { title: "Statistik" };
+
+const OWNER_EMAIL = "mewaprasetya@gmail.com";
+
+function deviceLabel(ua: string | null): string {
+  if (!ua) return "Perangkat tak dikenal";
+  if (/iphone|ipad|ipod/i.test(ua)) return "iPhone/iPad";
+  if (/android/i.test(ua)) return "Android";
+  if (/windows/i.test(ua)) return "Windows";
+  if (/macintosh/i.test(ua)) return "Mac";
+  if (/linux/i.test(ua)) return "Linux";
+  return "Perangkat lain";
+}
 
 export default async function StatsPage() {
   const session = await auth();
   const userId = Number(session!.user!.id);
+  const isOwner = session!.user!.email === OWNER_EMAIL;
 
   const stats = await getWeeklyStats(userId, 7);
   const summary = await getDashboardSummary(userId);
+
+  let downloadCount = 0;
+  let recentDownloads: DownloadRow[] = [];
+  if (isOwner) {
+    [downloadCount, recentDownloads] = await Promise.all([
+      countDownloads(),
+      getRecentDownloads(20),
+    ]);
+  }
 
   const weekTotal = stats.reduce((sum, d) => sum + d.completed, 0);
   const best = [...stats].sort((a, b) => b.completed - a.completed)[0];
@@ -53,6 +81,41 @@ export default async function StatsPage() {
       </section>
 
       <StatsChart data={stats} />
+
+      {isOwner && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-slate-900">📥 Unduhan APK</h2>
+            <span className="text-sm font-bold text-indigo-600">
+              {downloadCount} kali
+            </span>
+          </div>
+          {recentDownloads.length === 0 ? (
+            <p className="mt-3 text-sm text-slate-500">
+              Belum ada unduhan APK tercatat.
+            </p>
+          ) : (
+            <ul className="mt-3 divide-y divide-slate-100">
+              {recentDownloads.map((d) => (
+                <li key={d.id} className="py-2.5 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="truncate font-medium text-slate-800">
+                      {d.name ?? "Tamu"}
+                    </p>
+                    <span className="flex-none text-xs text-slate-400">
+                      {d.created_at}
+                    </span>
+                  </div>
+                  <p className="truncate text-xs text-slate-500">
+                    {deviceLabel(d.user_agent)} · {d.ip ?? "IP tersembunyi"}
+                    {d.email ? ` · ${d.email}` : ""}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </div>
   );
 }

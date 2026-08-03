@@ -28,6 +28,16 @@ export interface TaskRow {
   completed_at: string | null;
 }
 
+export interface DownloadRow {
+  id: number;
+  user_id: number | null;
+  name: string | null;
+  email: string | null;
+  ip: string | null;
+  user_agent: string | null;
+  created_at: string;
+}
+
 export type TaskFilter = {
   status?: "semua" | "aktif" | "selesai";
   category?: string;
@@ -78,6 +88,14 @@ const SCHEMA = `
     key      TEXT PRIMARY KEY,
     count    INTEGER NOT NULL,
     reset_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS downloads (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    ip         TEXT,
+    user_agent TEXT,
+    created_at TEXT NOT NULL
   );
 `;
 
@@ -407,6 +425,47 @@ export async function getWeeklyStats(
     });
   }
   return result;
+}
+
+// ---- downloads ----
+
+export async function recordDownload(data: {
+  userId?: number | null;
+  ip?: string | null;
+  userAgent?: string | null;
+}): Promise<void> {
+  await initDb();
+  await db.execute({
+    sql: "INSERT INTO downloads (user_id, ip, user_agent, created_at) VALUES (?, ?, ?, ?)",
+    args: [
+      data.userId ?? null,
+      data.ip ?? null,
+      data.userAgent ?? null,
+      localNowString(),
+    ],
+  });
+}
+
+export async function countDownloads(): Promise<number> {
+  await initDb();
+  const r = await db.execute({
+    sql: "SELECT COUNT(*) AS c FROM downloads",
+    args: [],
+  });
+  return Number((r.rows[0] as unknown as { c: number }).c ?? 0);
+}
+
+export async function getRecentDownloads(limit = 20): Promise<DownloadRow[]> {
+  await initDb();
+  const r = await db.execute({
+    sql: `SELECT d.id, d.user_id, d.ip, d.user_agent, d.created_at, u.name, u.email
+       FROM downloads d
+       LEFT JOIN users u ON u.id = d.user_id
+       ORDER BY d.id DESC
+       LIMIT ?`,
+    args: [limit],
+  });
+  return r.rows as unknown as DownloadRow[];
 }
 
 // ---- helpers ----

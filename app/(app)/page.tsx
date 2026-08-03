@@ -4,6 +4,7 @@ import { InstallApp } from "@/components/InstallApp";
 import { RealtimeClock } from "@/components/RealtimeClock";
 import { TaskItem } from "@/components/TaskItem";
 import {
+  countDownloads,
   getDashboardSummary,
   getTaskCategories,
   getTodayTasks,
@@ -50,6 +51,7 @@ export default async function HomePage() {
   const todayTasks = await getTodayTasks(userId);
   const upcoming = await getUpcomingTasks(userId, 3);
   const categories = await getTaskCategories(userId);
+  const downloadCount = await countDownloads();
 
   const { text, emoji } = greetingByHour();
 
@@ -175,7 +177,7 @@ export default async function HomePage() {
       </section>
 
       {/* Pasang aplikasi */}
-      <InstallApp />
+      <InstallApp downloadCount={downloadCount} />
 
       {/* Deadline terdekat */}
       {upcoming.length > 0 && (
