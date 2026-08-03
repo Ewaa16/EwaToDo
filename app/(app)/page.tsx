@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/auth";
+import { InstallApp } from "@/components/InstallApp";
 import { RealtimeClock } from "@/components/RealtimeClock";
 import { TaskItem } from "@/components/TaskItem";
 import {
@@ -172,6 +173,9 @@ export default async function HomePage() {
           </ul>
         )}
       </section>
+
+      {/* Pasang aplikasi */}
+      <InstallApp />
 
       {/* Deadline terdekat */}
       {upcoming.length > 0 && (
