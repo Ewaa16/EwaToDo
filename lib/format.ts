@@ -3,22 +3,25 @@ import { jakartaParts, JAKARTA_TZ } from "@/lib/jakarta";
 
 export const PRIORITY_META: Record<
   Priority,
-  { label: string; badge: string; dot: string }
+  { label: string; badge: string; dot: string; accent: string }
 > = {
   rendah: {
     label: "Rendah",
-    badge: "bg-emerald-100 text-emerald-700",
+    badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
     dot: "bg-emerald-500",
+    accent: "border-l-emerald-500",
   },
   sedang: {
     label: "Sedang",
-    badge: "bg-amber-100 text-amber-700",
+    badge: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
     dot: "bg-amber-500",
+    accent: "border-l-amber-500",
   },
   tinggi: {
     label: "Tinggi",
-    badge: "bg-rose-100 text-rose-700",
+    badge: "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
     dot: "bg-rose-500",
+    accent: "border-l-rose-500",
   },
 };
 
@@ -34,6 +37,22 @@ export function formatDateLocal(iso: string): string {
 
 export function isOverdue(dueDate: string): boolean {
   return dueDate < localDateNow();
+}
+
+function addDaysJakarta(iso: string, n: number): string {
+  const d = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return iso;
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+export function formatDueLabel(dueDate: string): string {
+  const today = localDateNow();
+  if (dueDate < today) return "Terlambat";
+  if (dueDate === today) return "Hari ini";
+  if (dueDate === addDaysJakarta(today, 1)) return "Besok";
+  if (dueDate === addDaysJakarta(today, 2)) return "Lusa";
+  return formatDateLocal(dueDate);
 }
 
 export function localDateNow(): string {

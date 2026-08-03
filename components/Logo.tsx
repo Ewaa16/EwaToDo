@@ -19,8 +19,10 @@ export function Logo({ size = "md" }: { size?: "sm" | "md" }) {
           <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
         </svg>
       </span>
-      <span className={`${text} font-bold tracking-tight text-slate-900`}>
-        Ewa<span className="text-indigo-600">ToDo</span>
+      <span
+        className={`${text} font-bold tracking-tight text-slate-900 dark:text-white`}
+      >
+        Ewa<span className="text-indigo-600 dark:text-indigo-400">ToDo</span>
       </span>
     </span>
   );

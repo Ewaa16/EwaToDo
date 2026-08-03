@@ -73,16 +73,16 @@ export function InstallApp({ downloadCount = 0 }: { downloadCount?: number }) {
 
   if (installed) {
     return (
-      <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+      <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-500/40 dark:bg-emerald-500/10">
         <div className="flex items-start gap-3">
           <span className="text-2xl" aria-hidden="true">
             ✅
           </span>
           <div>
-            <h2 className="font-semibold text-slate-900">
+            <h2 className="font-semibold text-slate-900 dark:text-white">
               EwaToDo terpasang!
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
               Cari ikon EwaToDo di layar utama HP-mu. Tidak ada tanda unduhan di
               notifikasi — itu normal, aplikasinya sudah terpasang.
             </p>
@@ -96,16 +96,16 @@ export function InstallApp({ downloadCount = 0 }: { downloadCount?: number }) {
   if (!promptEvent && !isIOS && !isAndroid) return null;
 
   return (
-    <section className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-50 p-5 shadow-sm">
+    <section className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-50 p-5 shadow-sm dark:border-indigo-500/40 dark:from-indigo-500/10 dark:to-violet-500/10">
       <div className="flex items-start gap-3">
         <span className="text-2xl" aria-hidden="true">
           📲
         </span>
         <div className="flex-1">
-          <h2 className="font-semibold text-slate-900">
+          <h2 className="font-semibold text-slate-900 dark:text-white">
             Pasang Aplikasi EwaToDo
           </h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
             {promptEvent
               ? "Pasang EwaToDo ke layar utama dengan sekali tap. Tampil seperti aplikasi penuh — tanpa perlu lewat menu Chrome."
               : isIOS
@@ -116,7 +116,7 @@ export function InstallApp({ downloadCount = 0 }: { downloadCount?: number }) {
       </div>
 
       {installFailed && (
-        <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
+        <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
           Belum terpasang — coba tap tombol lagi atau ikuti langkah manual di
           bawah.
         </p>
@@ -149,16 +149,16 @@ export function InstallApp({ downloadCount = 0 }: { downloadCount?: number }) {
         <button
           type="button"
           onClick={() => setShowManual((v) => !v)}
-          className="mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-700"
+          className="mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
         >
           {showManual ? "Sembunyikan panduan" : "Cara pasang manual"}
         </button>
       )}
 
       {showManual && !isIOS && (
-        <ol className="mt-3 space-y-2 text-sm text-slate-600">
+        <ol className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
           <li>
-            <span className="font-semibold text-slate-800">
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
               Android (Chrome/Edge):
             </span>{" "}
             tekan ⋮ di kanan atas → pilih{" "}
@@ -169,21 +169,21 @@ export function InstallApp({ downloadCount = 0 }: { downloadCount?: number }) {
       )}
 
       {isIOS && (
-        <div className="mt-4 border-t border-indigo-100 pt-4">
-          <p className="text-sm font-semibold text-slate-800">
+        <div className="mt-4 border-t border-indigo-100 pt-4 dark:border-indigo-500/20">
+          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
             Cara pasang di iPhone:
           </p>
           {isInAppBrowser && (
-            <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+            <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
               Kamu membuka halaman ini dari dalam aplikasi chat/media sosial, jadi
               menu “Tambahkan ke Layar Utama” tidak tersedia di sini. Buka dulu
               di Safari (langkah 1).
             </p>
           )}
-          <ol className="mt-2 space-y-2 text-sm text-slate-600">
+          <ol className="mt-2 space-y-2 text-sm text-slate-600 dark:text-slate-300">
             {isInAppBrowser && (
               <li>
-                <span className="font-semibold text-slate-800">
+                <span className="font-semibold text-slate-800 dark:text-slate-100">
                   Buka di Safari:
                 </span>{" "}
                 ketuk menu ⋯ di kanan atas lalu pilih{" "}
@@ -193,14 +193,16 @@ export function InstallApp({ downloadCount = 0 }: { downloadCount?: number }) {
               </li>
             )}
             <li>
-              <span className="font-semibold text-slate-800">Bagikan:</span> di
-              Safari ketuk tombol <span className="font-semibold">Bagikan ⤴</span>{" "}
+              <span className="font-semibold text-slate-800 dark:text-slate-100">
+                Bagikan:
+              </span>{" "}
+              di Safari ketuk tombol <span className="font-semibold">Bagikan ⤴</span>{" "}
               di bawah. Kalau tidak terlihat, ketuk{" "}
               <span className="font-semibold">“...” (More)</span> di kanan bawah
               dulu, baru ketuk <span className="font-semibold">Bagikan</span>.
             </li>
             <li>
-              <span className="font-semibold text-slate-800">
+              <span className="font-semibold text-slate-800 dark:text-slate-100">
                 Tambahkan ke Layar Utama:
               </span>{" "}
               geser ke bawah lalu ketuk{" "}
@@ -210,7 +212,9 @@ export function InstallApp({ downloadCount = 0 }: { downloadCount?: number }) {
               <span className="font-semibold">Edit Actions</span> dulu.
             </li>
             <li>
-              <span className="font-semibold text-slate-800">Tambah:</span>{" "}
+              <span className="font-semibold text-slate-800 dark:text-slate-100">
+                Tambah:
+              </span>{" "}
               pastikan toggle{" "}
               <span className="font-semibold">“Open as Web App”</span> aktif,
               lalu ketuk <span className="font-semibold">Tambah</span> di kanan
@@ -221,7 +225,7 @@ export function InstallApp({ downloadCount = 0 }: { downloadCount?: number }) {
             <button
               type="button"
               onClick={copyLink}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50 dark:border-indigo-500/50 dark:bg-slate-800 dark:text-indigo-300 dark:hover:bg-slate-700"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -242,24 +246,24 @@ export function InstallApp({ downloadCount = 0 }: { downloadCount?: number }) {
       )}
 
       {isAndroid && (
-        <div className="mt-4 border-t border-indigo-100 pt-4">
-          <p className="text-sm font-semibold text-slate-800">
+        <div className="mt-4 border-t border-indigo-100 pt-4 dark:border-indigo-500/20">
+          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
             Atau unduh sebagai file (Android):
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             Tombol di bawah mengunduh file installer (APK). Setelah terunduh,
             buka filenya lalu izinkan Chrome menginstal dari “sumber tidak
             dikenal”.
           </p>
           {downloadCount > 0 && (
-            <p className="mt-1 text-xs font-medium text-indigo-600">
+            <p className="mt-1 text-xs font-medium text-indigo-600 dark:text-indigo-400">
               📥 Sudah diunduh {downloadCount} kali.
             </p>
           )}
           <a
             href="/api/apk-download"
             download="EwaToDo.apk"
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50 dark:border-indigo-500/50 dark:bg-slate-800 dark:text-indigo-300 dark:hover:bg-slate-700"
           >
             <svg
               viewBox="0 0 24 24"

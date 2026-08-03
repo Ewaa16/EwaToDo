@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { signOutAction } from "@/actions/auth";
 import { Logo } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const NAV_ITEMS = [
   {
@@ -83,7 +84,7 @@ export function Navbar({ user }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/85 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-slate-900/85">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3">
           <Link href="/" aria-label="Beranda">
             <Logo size="sm" />
@@ -98,8 +99,8 @@ export function Navbar({ user }: NavbarProps) {
                   href={item.href}
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     active
-                      ? "bg-indigo-50 text-indigo-700"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
                   }`}
                 >
                   {item.label}
@@ -108,14 +109,15 @@ export function Navbar({ user }: NavbarProps) {
             })}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <ThemeToggle />
             <div className="hidden items-center gap-2.5 sm:flex">
               {user.image && !imgError ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={user.image}
                   alt={user.name ?? "Foto profil"}
-                  className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-100"
+                  className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-100 dark:ring-indigo-500/40"
                   referrerPolicy="no-referrer"
                   onError={() => setImgError(true)}
                 />
@@ -124,14 +126,14 @@ export function Navbar({ user }: NavbarProps) {
                   {initial}
                 </span>
               )}
-              <span className="max-w-[10rem] truncate text-sm font-medium text-slate-700">
+              <span className="max-w-[10rem] truncate text-sm font-medium text-slate-700 dark:text-slate-300">
                 {user.name}
               </span>
             </div>
             <form action={signOutAction}>
               <button
                 type="submit"
-                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600"
+                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-rose-500/60 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
               >
                 Keluar
               </button>
@@ -140,7 +142,7 @@ export function Navbar({ user }: NavbarProps) {
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 md:hidden">
         <div className="mx-auto grid max-w-3xl grid-cols-3">
           {NAV_ITEMS.map((item) => {
             const active = isActive(pathname, item.href);
@@ -150,8 +152,8 @@ export function Navbar({ user }: NavbarProps) {
                 href={item.href}
                 className={`flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors ${
                   active
-                    ? "text-indigo-600"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 }`}
               >
                 {item.icon}

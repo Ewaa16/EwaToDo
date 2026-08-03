@@ -20,10 +20,10 @@ export default function RootError({
       <p className="mt-8 text-5xl" aria-hidden="true">
         😅
       </p>
-      <h1 className="mt-4 text-2xl font-bold text-slate-900">
+      <h1 className="mt-4 text-2xl font-bold text-slate-900 dark:text-white">
         Terjadi kesalahan
       </h1>
-      <p className="mt-2 max-w-md text-sm text-slate-500">
+      <p className="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
         Ada yang tidak beres saat memproses halaman ini. Jangan khawatir, data
         kamu tetap aman — coba lagi sebentar lagi.
       </p>

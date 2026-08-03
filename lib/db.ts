@@ -406,6 +406,41 @@ export async function getWeeklyStats(
   return result;
 }
 
+// ---- streak ----
+
+export type Streak = { streak: number; todayDone: boolean };
+
+export async function getCurrentStreak(userId: number): Promise<Streak> {
+  await initDb();
+  const r = await db.execute({
+    sql: `SELECT DISTINCT substr(completed_at, 1, 10) AS date
+       FROM tasks
+       WHERE user_id = ? AND completed = 1 AND completed_at IS NOT NULL
+       ORDER BY date DESC`,
+    args: [userId],
+  });
+  const dates = new Set(
+    (r.rows as unknown as { date: string }[]).map((x) => x.date)
+  );
+  if (dates.size === 0) return { streak: 0, todayDone: false };
+
+  const today = localToday();
+  const addDays = (iso: string, n: number) => {
+    const d = new Date(`${iso}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0, 10);
+  };
+
+  const todayDone = dates.has(today);
+  let cursor = todayDone ? today : addDays(today, -1);
+  let streak = 0;
+  while (dates.has(cursor)) {
+    streak += 1;
+    cursor = addDays(cursor, -1);
+  }
+  return { streak, todayDone };
+}
+
 // ---- downloads ----
 
 export async function recordDownload(data: {

@@ -9,17 +9,17 @@ export function RegisterForm() {
   const [state, formAction, pending] = useActionState(registerAction, {});
 
   const inputCls =
-    "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100";
+    "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/30";
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-indigo-100/60">
+    <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-indigo-100/60 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/40">
       <div className="mb-6 flex justify-center">
         <Logo />
       </div>
-      <h1 className="text-center text-2xl font-bold text-slate-900">
+      <h1 className="text-center text-2xl font-bold text-slate-900 dark:text-white">
         Buat akun baru
       </h1>
-      <p className="mt-1.5 text-center text-sm text-slate-500">
+      <p className="mt-1.5 text-center text-sm text-slate-500 dark:text-slate-400">
         Mulai catat tugas harianmu sekarang
       </p>
 
@@ -27,7 +27,7 @@ export function RegisterForm() {
         <div>
           <label
             htmlFor="name"
-            className="mb-1.5 block text-sm font-medium text-slate-700"
+            className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             Nama
           </label>
@@ -44,7 +44,7 @@ export function RegisterForm() {
         <div>
           <label
             htmlFor="email"
-            className="mb-1.5 block text-sm font-medium text-slate-700"
+            className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             Email
           </label>
@@ -61,7 +61,7 @@ export function RegisterForm() {
         <div>
           <label
             htmlFor="password"
-            className="mb-1.5 block text-sm font-medium text-slate-700"
+            className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             Password
           </label>
@@ -78,7 +78,7 @@ export function RegisterForm() {
         </div>
 
         {state.error && (
-          <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-600">
+          <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-600 dark:bg-rose-500/10 dark:text-rose-300">
             {state.error}
           </p>
         )}
@@ -92,11 +92,11 @@ export function RegisterForm() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-500">
+      <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
         Sudah punya akun?{" "}
         <Link
           href="/login"
-          className="font-semibold text-indigo-600 hover:text-indigo-700"
+          className="font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
         >
           Masuk di sini
         </Link>

@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { deleteTaskAction, editTaskAction, toggleTaskAction } from "@/actions/tasks";
 import { TaskForm } from "@/components/TaskForm";
 import type { TaskRow } from "@/lib/db";
-import { PRIORITY_META, formatDateLocal, isOverdue, localDateNow } from "@/lib/format";
+import { PRIORITY_META, formatDateLocal, formatDueLabel, isOverdue, localDateNow } from "@/lib/format";
 
 export function TaskItem({
   task,
@@ -34,8 +34,10 @@ export function TaskItem({
 
   return (
     <li
-      className={`group rounded-xl border bg-white p-4 shadow-sm transition-all ${
-        completed ? "border-slate-200 opacity-70" : "border-slate-200"
+      className={`group rounded-xl border border-l-4 bg-white p-4 shadow-sm transition-all duration-300 dark:bg-slate-900 ${
+        completed
+          ? "border-slate-200 opacity-70 dark:border-slate-800"
+          : `border-slate-200 ${PRIORITY_META[task.priority].accent} dark:border-slate-800`
       }`}
     >
       {editing ? (
@@ -59,8 +61,8 @@ export function TaskItem({
             aria-label={completed ? "Tandai belum selesai" : "Tandai selesai"}
             className={`mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-md border-2 transition-colors disabled:opacity-50 ${
               completed
-                ? "border-indigo-600 bg-indigo-600 text-white"
-                : "border-slate-300 bg-white hover:border-indigo-500"
+                ? "border-indigo-600 bg-indigo-600 text-white animate-[task-pop_0.3s_ease-out]"
+                : "border-slate-300 bg-white hover:border-indigo-500 dark:border-slate-600 dark:bg-slate-800"
             }`}
           >
             {completed && (
@@ -80,14 +82,18 @@ export function TaskItem({
 
           <div className="min-w-0 flex-1">
             <p
-              className={`text-sm font-medium leading-snug text-slate-800 ${
-                completed ? "line-through decoration-slate-400" : ""
+              className={`text-sm font-medium leading-snug text-slate-800 transition-all duration-300 dark:text-slate-200 ${
+                completed
+                  ? "line-through decoration-slate-400 dark:decoration-slate-500"
+                  : ""
               }`}
             >
               {task.title}
             </p>
             {task.description && (
-              <p className="mt-1 text-sm text-slate-500">{task.description}</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {task.description}
+              </p>
             )}
 
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -99,16 +105,17 @@ export function TaskItem({
               </span>
               {task.due_date && (
                 <span
+                  title={formatDateLocal(task.due_date)}
                   className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                     overdue
-                      ? "bg-rose-100 text-rose-700"
+                      ? "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
                       : dueToday
-                        ? "bg-indigo-100 text-indigo-700"
-                        : "bg-slate-100 text-slate-600"
+                        ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
+                        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
                   }`}
                 >
                   {overdue ? "Terlambat · " : ""}
-                  {formatDateLocal(task.due_date)}
+                  {formatDueLabel(task.due_date)}
                 </span>
               )}
             </div>
@@ -118,7 +125,7 @@ export function TaskItem({
             <button
               type="button"
               onClick={() => setEditing((v) => !v)}
-              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600"
+              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-800 dark:hover:text-indigo-400"
               aria-label="Edit tugas"
             >
               <svg
@@ -139,7 +146,7 @@ export function TaskItem({
               className={`rounded-lg p-2 transition-colors ${
                 confirming
                   ? "bg-rose-600 text-white"
-                  : "text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                  : "text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
               }`}
               aria-label="Hapus tugas"
             >

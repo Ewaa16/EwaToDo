@@ -39,16 +39,18 @@ export default async function TasksPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           📋 Semua Tugas
         </h1>
-        <p className="mt-1 text-slate-600">
+        <p className="mt-1 text-slate-600 dark:text-slate-400">
           Kelola seluruh tugas harianmu dalam satu tempat.
         </p>
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 font-semibold text-slate-900">➕ Tambah tugas baru</h2>
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="mb-4 font-semibold text-slate-900 dark:text-white">
+          ➕ Tambah tugas baru
+        </h2>
         <TaskForm action={addTaskAction} submitLabel="Tambah Tugas" />
       </section>
 
@@ -57,16 +59,16 @@ export default async function TasksPage({
       </Suspense>
 
       {tasks.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
           <p className="text-4xl" aria-hidden="true">
             {status === "selesai" ? "🎉" : "📝"}
           </p>
-          <p className="mt-3 font-semibold text-slate-700">
+          <p className="mt-3 font-semibold text-slate-700 dark:text-slate-200">
             {status === "selesai"
               ? "Belum ada tugas yang selesai"
               : "Tidak ada tugas ditemukan"}
           </p>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {status === "selesai"
               ? "Tandai tugas selesai dan tugas akan muncul di sini."
               : "Coba ubah filter atau tambahkan tugas baru."}

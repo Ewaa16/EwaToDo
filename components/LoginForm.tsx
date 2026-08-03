@@ -5,28 +5,30 @@ import { useActionState } from "react";
 import { loginAction, loginGoogleAction } from "@/actions/auth";
 import { Logo } from "@/components/Logo";
 
-export function LoginForm() {
+export function LoginForm({ isNew = false }: { isNew?: boolean }) {
   const [state, formAction, pending] = useActionState(loginAction, {});
 
   const inputCls =
-    "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100";
+    "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/30";
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-indigo-100/60">
+    <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-indigo-100/60 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/40">
       <div className="mb-6 flex justify-center">
         <Logo />
       </div>
-      <h1 className="text-center text-2xl font-bold text-slate-900">
-        Selamat datang kembali
+      <h1 className="text-center text-2xl font-bold text-slate-900 dark:text-white">
+        {isNew ? "Selamat datang, akunmu siap!" : "Selamat datang di EwaToDo"}
       </h1>
-      <p className="mt-1.5 text-center text-sm text-slate-500">
-        Masuk untuk mengelola tugas harianmu
+      <p className="mt-1.5 text-center text-sm text-slate-500 dark:text-slate-400">
+        {isNew
+          ? "Masuk dengan akun yang barusan kamu buat"
+          : "Masuk untuk mengelola tugas harianmu"}
       </p>
 
       <form action={loginGoogleAction} className="mt-6">
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+          className="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
             <path
@@ -51,18 +53,18 @@ export function LoginForm() {
       </form>
 
       <div className="my-6 flex items-center gap-3">
-        <span className="h-px flex-1 bg-slate-200" />
-        <span className="text-xs font-medium uppercase tracking-wider text-slate-400">
+        <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+        <span className="text-xs font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
           atau
         </span>
-        <span className="h-px flex-1 bg-slate-200" />
+        <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
       </div>
 
       <form action={formAction} className="space-y-4">
         <div>
           <label
             htmlFor="email"
-            className="mb-1.5 block text-sm font-medium text-slate-700"
+            className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             Email
           </label>
@@ -79,7 +81,7 @@ export function LoginForm() {
         <div>
           <label
             htmlFor="password"
-            className="mb-1.5 block text-sm font-medium text-slate-700"
+            className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             Password
           </label>
@@ -96,7 +98,7 @@ export function LoginForm() {
         </div>
 
         {state.error && (
-          <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-600">
+          <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-600 dark:bg-rose-500/10 dark:text-rose-300">
             {state.error}
           </p>
         )}
@@ -110,11 +112,11 @@ export function LoginForm() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-500">
+      <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
         Belum punya akun?{" "}
         <Link
           href="/register"
-          className="font-semibold text-indigo-600 hover:text-indigo-700"
+          className="font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
         >
           Daftar sekarang
         </Link>

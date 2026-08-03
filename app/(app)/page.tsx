@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/auth";
+import { Confetti } from "@/components/Confetti";
 import { InstallApp } from "@/components/InstallApp";
 import { RealtimeClock } from "@/components/RealtimeClock";
 import { TaskItem } from "@/components/TaskItem";
@@ -10,10 +11,11 @@ import {
   getUpcomingTasks,
 } from "@/lib/db";
 import {
-  formatDateLocal,
+  formatDueLabel,
   greetingByHour,
   isOverdue,
   todayLabel,
+  PRIORITY_META,
 } from "@/lib/format";
 
 function StatCard({
@@ -28,15 +30,21 @@ function StatCard({
   icon: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-medium text-slate-500">{label}</p>
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          {label}
+        </p>
         <span className="text-base" aria-hidden="true">
           {icon}
         </span>
       </div>
-      <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
-      <p className="mt-0.5 text-[11px] text-slate-400">{hint}</p>
+      <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
+        {value}
+      </p>
+      <p className="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
+        {hint}
+      </p>
     </div>
   );
 }
@@ -62,15 +70,19 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
+      <Confetti
+        show={summary.todayDue > 0 && summary.todayCompleted === summary.todayDue}
+      />
+
       {/* Sapaan */}
       <section>
-        <p className="text-sm font-medium text-indigo-600">
+        <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
           {todayLabel()} · <RealtimeClock />
         </p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
           {emoji} {text}, {name}!
         </h1>
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2 text-slate-600 dark:text-slate-400">
           {summary.todayDue === 0
             ? "Tidak ada tugas yang jatuh tempo hari ini. Nikmati hari santaimu atau siapkan rencana baru!"
             : summary.todayCompleted === summary.todayDue
@@ -102,18 +114,22 @@ export default async function HomePage() {
       </section>
 
       {/* Progress */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-slate-900">Progress hari ini</h2>
-          <span className="text-sm font-bold text-indigo-600">{progress}%</span>
+          <h2 className="font-semibold text-slate-900 dark:text-white">
+            Progress hari ini
+          </h2>
+          <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+            {progress}%
+          </span>
         </div>
-        <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-slate-100">
+        <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
           <div
             className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
           {summary.todayCompleted} dari {summary.todayDue} tugas hari ini telah
           diselesaikan · {summary.completedTotal} selesai secara keseluruhan
         </p>
@@ -144,26 +160,26 @@ export default async function HomePage() {
       {/* Tugas hari ini */}
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
             Tugas hari ini
           </h2>
           <Link
             href="/tasks"
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+            className="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
           >
             Lihat semua →
           </Link>
         </div>
         {todayTasks.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 p-8 text-center">
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 p-8 text-center dark:border-slate-700 dark:bg-slate-900/60">
             <p className="text-3xl" aria-hidden="true">
               🎯
             </p>
-            <p className="mt-2 font-medium text-slate-700">
+            <p className="mt-2 font-medium text-slate-700 dark:text-slate-200">
               Belum ada tugas hari ini
             </p>
-            <p className="text-sm text-slate-500">
-              Klik <span className="font-semibold text-indigo-600">Tambah Tugas</span>{" "}
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Klik <span className="font-semibold text-indigo-600 dark:text-indigo-400">Tambah Tugas</span>{" "}
               untuk memulai.
             </p>
           </div>
@@ -181,29 +197,35 @@ export default async function HomePage() {
 
       {/* Deadline terdekat */}
       {upcoming.length > 0 && (
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 font-semibold text-slate-900">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="mb-4 font-semibold text-slate-900 dark:text-white">
             ⏰ Deadline terdekat
           </h2>
           <ul className="space-y-3">
             {upcoming.map((task) => (
-              <li key={task.id} className="flex items-center justify-between gap-3">
+              <li
+                key={task.id}
+                className="flex items-center justify-between gap-3"
+              >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-slate-800">
+                  <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">
+                    <span
+                      className={`mr-1.5 inline-block h-2 w-2 rounded-full align-middle ${PRIORITY_META[task.priority].dot}`}
+                    />
                     {task.title}
                   </p>
-                  <p className="text-xs text-slate-500">
-                    {task.priority}
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Prioritas {task.priority}
                   </p>
                 </div>
                 <span
                   className={`flex-none rounded-full px-2.5 py-1 text-xs font-medium ${
                     isOverdue(task.due_date!)
-                      ? "bg-rose-100 text-rose-700"
-                      : "bg-indigo-100 text-indigo-700"
+                      ? "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
+                      : "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
                   }`}
                 >
-                  {formatDateLocal(task.due_date!)}
+                  {formatDueLabel(task.due_date!)}
                 </span>
               </li>
             ))}

@@ -11,7 +11,7 @@ export default async function AuthLayout({
     redirect("/");
   }
   return (
-    <div className="flex min-h-full flex-col bg-gradient-to-br from-indigo-50 via-slate-50 to-violet-100">
+    <div className="flex min-h-full flex-col bg-gradient-to-br from-indigo-50 via-slate-50 to-violet-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
       {children}
     </div>
   );
