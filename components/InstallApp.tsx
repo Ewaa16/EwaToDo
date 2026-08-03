@@ -7,6 +7,9 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
+const IN_APP_BROWSER_UA =
+  /WhatsApp|Instagram|FBAV|FBAN|FBIOS|FB_IAB|Messenger|Telegram|MicroMessenger|TikTok|Twitter|GoogleApp|GSA|Snapchat|Line\//i;
+
 export function InstallApp() {
   const [promptEvent, setPromptEvent] =
     useState<BeforeInstallPromptEvent | null>(null);
@@ -14,14 +17,17 @@ export function InstallApp() {
   const [installFailed, setInstallFailed] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
+  const [isInAppBrowser, setIsInAppBrowser] = useState(false);
   const [standalone, setStandalone] = useState(false);
   const [showManual, setShowManual] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setStandalone(window.matchMedia("(display-mode: standalone)").matches);
       setIsIOS(/iphone|ipad|ipod/i.test(navigator.userAgent));
       setIsAndroid(/android/i.test(navigator.userAgent));
+      setIsInAppBrowser(IN_APP_BROWSER_UA.test(navigator.userAgent));
     }, 0);
 
     function onBeforeInstall(e: Event) {
@@ -52,6 +58,16 @@ export function InstallApp() {
     } catch {
       setInstallFailed(true);
       setPromptEvent(null);
+    }
+  }
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
     }
   }
 
@@ -92,7 +108,9 @@ export function InstallApp() {
           <p className="mt-1 text-sm text-slate-600">
             {promptEvent
               ? "Pasang EwaToDo ke layar utama dengan sekali tap. Tampil seperti aplikasi penuh — tanpa perlu lewat menu Chrome."
-              : "Di iPhone, pasang lewat menu Bagikan (⤴) di Safari lalu pilih “Tambahkan ke Layar Utama”."}
+              : isIOS
+                ? "iPhone tidak bisa mengunduh file installer seperti Android, tapi EwaToDo tetap bisa terpasang seperti aplikasi sungguhan lewat Safari."
+                : "Pasang EwaToDo ke layar utama. Tampil seperti aplikasi penuh — tanpa perlu lewat menu Chrome."}
           </p>
         </div>
       </div>
@@ -127,15 +145,17 @@ export function InstallApp() {
         </button>
       )}
 
-      <button
-        type="button"
-        onClick={() => setShowManual((v) => !v)}
-        className="mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-700"
-      >
-        {showManual ? "Sembunyikan panduan" : "Cara pasang manual"}
-      </button>
+      {!isIOS && (
+        <button
+          type="button"
+          onClick={() => setShowManual((v) => !v)}
+          className="mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-700"
+        >
+          {showManual ? "Sembunyikan panduan" : "Cara pasang manual"}
+        </button>
+      )}
 
-      {showManual && (
+      {showManual && !isIOS && (
         <ol className="mt-3 space-y-2 text-sm text-slate-600">
           <li>
             <span className="font-semibold text-slate-800">
@@ -145,15 +165,80 @@ export function InstallApp() {
             <span className="font-semibold">“Tambahkan ke layar utama”</span> →
             “Tambah”.
           </li>
-          <li>
-            <span className="font-semibold text-slate-800">
-              iPhone (Safari):
-            </span>{" "}
-            tekan tombol Bagikan ⤴ di bawah → pilih{" "}
-            <span className="font-semibold">“Tambahkan ke Layar Utama”</span> →
-            “Tambah”.
-          </li>
         </ol>
+      )}
+
+      {isIOS && (
+        <div className="mt-4 border-t border-indigo-100 pt-4">
+          <p className="text-sm font-semibold text-slate-800">
+            Cara pasang di iPhone:
+          </p>
+          {isInAppBrowser && (
+            <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+              Kamu membuka halaman ini dari dalam aplikasi chat/media sosial, jadi
+              menu “Tambahkan ke Layar Utama” tidak tersedia di sini. Buka dulu
+              di Safari (langkah 1).
+            </p>
+          )}
+          <ol className="mt-2 space-y-2 text-sm text-slate-600">
+            {isInAppBrowser && (
+              <li>
+                <span className="font-semibold text-slate-800">
+                  Buka di Safari:
+                </span>{" "}
+                ketuk menu ⋯ di kanan atas lalu pilih{" "}
+                <span className="font-semibold">“Buka di Safari”</span> — atau
+                tap tombol <span className="font-semibold">Salin Tautan</span>{" "}
+                di bawah, lalu tempel di Safari.
+              </li>
+            )}
+            <li>
+              <span className="font-semibold text-slate-800">Bagikan:</span> di
+              Safari ketuk tombol <span className="font-semibold">Bagikan ⤴</span>{" "}
+              di bawah. Kalau tidak terlihat, ketuk{" "}
+              <span className="font-semibold">“...” (More)</span> di kanan bawah
+              dulu, baru ketuk <span className="font-semibold">Bagikan</span>.
+            </li>
+            <li>
+              <span className="font-semibold text-slate-800">
+                Tambahkan ke Layar Utama:
+              </span>{" "}
+              geser ke bawah lalu ketuk{" "}
+              <span className="font-semibold">“Tambahkan ke Layar Utama”</span>{" "}
+              — kalau tidak terlihat, ketuk{" "}
+              <span className="font-semibold">View More</span> atau{" "}
+              <span className="font-semibold">Edit Actions</span> dulu.
+            </li>
+            <li>
+              <span className="font-semibold text-slate-800">Tambah:</span>{" "}
+              pastikan toggle{" "}
+              <span className="font-semibold">“Open as Web App”</span> aktif,
+              lalu ketuk <span className="font-semibold">Tambah</span> di kanan
+              atas. Ikon EwaToDo pun muncul di layar utama.
+            </li>
+          </ol>
+          {isInAppBrowser && (
+            <button
+              type="button"
+              onClick={copyLink}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
+              >
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+              </svg>
+              {copied ? "Tautan tersalin ✓" : "Salin Tautan"}
+            </button>
+          )}
+        </div>
       )}
 
       {isAndroid && (
