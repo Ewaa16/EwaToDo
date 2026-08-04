@@ -14,6 +14,7 @@ export interface UserRow {
   image: string | null;
   provider: string;
   created_at: string;
+  last_login_at: string | null;
 }
 
 export interface TaskRow {
@@ -44,6 +45,7 @@ export interface AudienceUserRow {
   email: string;
   provider: string;
   created_at: string;
+  last_login_at: string | null;
   first_seen: string | null;
   last_seen: string | null;
   visit_count: number;
@@ -69,13 +71,14 @@ export const db = createClient({
 
 const SCHEMA = `
   CREATE TABLE IF NOT EXISTS users (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    name          TEXT NOT NULL,
-    email         TEXT NOT NULL UNIQUE,
-    password_hash TEXT,
-    image         TEXT,
-    provider      TEXT NOT NULL DEFAULT 'email',
-    created_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    name           TEXT NOT NULL,
+    email          TEXT NOT NULL UNIQUE,
+    password_hash  TEXT,
+    image          TEXT,
+    provider       TEXT NOT NULL DEFAULT 'email',
+    created_at     TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+    last_login_at  TEXT
   );
 
   CREATE TABLE IF NOT EXISTS tasks (
@@ -130,9 +133,24 @@ export function initDb(): Promise<void> {
     const statements = SCHEMA.split(";")
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
-    initPromise = db.batch(statements, "write").then(() => undefined);
+    initPromise = db
+      .batch(statements, "write")
+      .then(() => migrate())
+      .then(() => undefined);
   }
   return initPromise;
+}
+
+// Migrasi kolom yang ditambahkan setelah tabel dibuat (CREATE TABLE IF NOT EXISTS
+// tidak mengubah tabel lama). Idempotent; jalan sekali per proses bersama initDb.
+async function migrate(): Promise<void> {
+  const cols = await db.execute("PRAGMA table_info(users)");
+  const hasLastLogin = (cols.rows as unknown as { name: string }[]).some(
+    (c) => c.name === "last_login_at"
+  );
+  if (!hasLastLogin) {
+    await db.execute("ALTER TABLE users ADD COLUMN last_login_at TEXT");
+  }
 }
 
 // ---- users ----
@@ -164,8 +182,14 @@ export async function createUser(data: {
 }): Promise<UserRow> {
   await initDb();
   const info = await db.execute({
-    sql: "INSERT INTO users (name, email, password_hash, provider) VALUES (?, ?, ?, 'email')",
-    args: [data.name, data.email.toLowerCase(), data.password_hash],
+    sql: "INSERT INTO users (name, email, password_hash, provider, created_at, last_login_at) VALUES (?, ?, ?, 'email', ?, ?)",
+    args: [
+      data.name,
+      data.email.toLowerCase(),
+      data.password_hash,
+      localNowString(),
+      localNowString(),
+    ],
   });
   return (await getUserById(Number(info.lastInsertRowid)))!;
 }
@@ -186,10 +210,19 @@ export async function upsertGoogleUser(data: {
     return existing;
   }
   const info = await db.execute({
-    sql: "INSERT INTO users (name, email, image, provider) VALUES (?, ?, ?, 'google')",
-    args: [data.name, email, data.image ?? null],
+    sql: "INSERT INTO users (name, email, image, provider, created_at, last_login_at) VALUES (?, ?, ?, 'google', ?, ?)",
+    args: [data.name, email, data.image ?? null, localNowString(), localNowString()],
   });
   return (await getUserById(Number(info.lastInsertRowid)))!;
+}
+
+// Catat waktu login sungguhan (Google & Credentials) — dipanggil dari auth.ts.
+export async function recordLogin(email: string): Promise<void> {
+  await initDb();
+  await db.execute({
+    sql: "UPDATE users SET last_login_at = ? WHERE email = ?",
+    args: [localNowString(), email.toLowerCase()],
+  });
 }
 
 // ---- tasks ----
@@ -538,7 +571,7 @@ export async function recordVisit(data: {
 export async function getAudienceUsers(limit = 50): Promise<AudienceUserRow[]> {
   await initDb();
   const r = await db.execute({
-    sql: `SELECT u.id, u.name, u.email, u.provider, u.created_at,
+    sql: `SELECT u.id, u.name, u.email, u.provider, u.created_at, u.last_login_at,
                 MIN(v.created_at) AS first_seen,
                 MAX(v.created_at) AS last_seen,
                 COUNT(v.id) AS visit_count

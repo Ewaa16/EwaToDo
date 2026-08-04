@@ -160,11 +160,13 @@ export default async function AudiencePage() {
                     </span>
                   </div>
                   <span className="flex-none text-xs text-slate-400 dark:text-slate-500">
-                    aktif {formatWaktu(u.last_seen ?? "")}
+                    login{" "}
+                    {formatWaktu(u.last_login_at ?? u.last_seen ?? "")}
                   </span>
                 </div>
                 <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                  {u.email} · sejak {formatWaktu(u.first_seen ?? "")}
+                  {u.email} · aktif {formatWaktu(u.last_seen ?? "")} · sejak{" "}
+                  {formatWaktu(u.first_seen ?? "")}
                 </p>
               </li>
             ))}

@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { getUserByEmail, upsertGoogleUser } from "@/lib/db";
+import { getUserByEmail, recordLogin, upsertGoogleUser } from "@/lib/db";
 
 if (!process.env.AUTH_SECRET) {
   throw new Error(
@@ -62,6 +62,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.id = String(dbUser.id);
         } else {
           token.id = user.id;
+        }
+        // user hadir hanya saat login sungguhan → catat waktunya (Asia/Jakarta).
+        if (user.email) {
+          await recordLogin(user.email);
         }
       }
       return token;
