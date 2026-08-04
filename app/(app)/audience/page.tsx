@@ -21,13 +21,14 @@ function deviceLabel(ua: string | null): string {
   return "Perangkat lain";
 }
 
-// created_at berbentuk "YYYY-MM-DD HH:mm:ss" (Asia/Jakarta).
+// created_at berbentuk "YYYY-MM-DD HH:mm:ss" (Asia/Jakarta) — interpretasikan
+// sebagai UTC lalu render ulang di Asia/Jakarta agar tidak bergeser +7 jam.
 function formatWaktu(createdAt: string): string {
   const [datePart, timePart] = createdAt.split(" ");
   if (!datePart || !timePart) return createdAt;
   const [y, m, d] = datePart.split("-").map(Number);
   const [h, mi] = timePart.split(":").map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d, h, mi));
+  const dt = new Date(Date.UTC(y, m - 1, d, h, mi) - 7 * 60 * 60 * 1000);
   return dt.toLocaleString("id-ID", {
     timeZone: "Asia/Jakarta",
     day: "2-digit",
