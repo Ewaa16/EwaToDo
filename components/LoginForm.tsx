@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState, useEffect } from "react";
 import { loginAction, loginGoogleAction } from "@/actions/auth";
 import { Logo } from "@/components/Logo";
+import { PasswordInput } from "@/components/PasswordInput";
 
 const CONFETTI_KEY = "ewatodo-confetti-once";
 
@@ -95,15 +96,13 @@ export function LoginForm({ isNew = false }: { isNew?: boolean }) {
           >
             Password
           </label>
-          <input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             required
             minLength={8}
             autoComplete="current-password"
             placeholder="Minimal 8 karakter"
-            className={inputCls}
           />
         </div>
 
