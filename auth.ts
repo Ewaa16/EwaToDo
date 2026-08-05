@@ -86,10 +86,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.email = (token.email as string | null) ?? session.user.email;
         session.user.image = (token.image as string | null) ?? null;
       }
-      console.error(
-        "[dbg-session] user.image=",
-        session.user.image?.length ?? "null"
-      );
       return session;
     },
   },
