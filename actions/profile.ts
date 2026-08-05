@@ -46,7 +46,6 @@ export async function updateProfileImageAction(
 ): Promise<ProfileActionState> {
   const userId = await requireUserId();
   const image = String(formData.get("image") ?? "");
-  console.error("[dbg-action] userId=", userId, "imageLen=", image.length);
 
   if (!DATA_URL_RE.test(image)) {
     return { error: "Format gambar tidak valid." };
@@ -56,7 +55,12 @@ export async function updateProfileImageAction(
   }
 
   try {
-    await updateUserImage(userId, image);
+    const updated = await updateUserImage(userId, image);
+    if (!updated) {
+      return {
+        error: "Akun tidak ditemukan. Silakan keluar lalu masuk kembali.",
+      };
+    }
   } catch {
     return { error: "Gagal menyimpan foto profil. Coba lagi." };
   }
@@ -87,7 +91,12 @@ export async function updateProfileNameAction(
   }
 
   try {
-    await updateUserName(userId, parsed.data.name);
+    const updated = await updateUserName(userId, parsed.data.name);
+    if (!updated) {
+      return {
+        error: "Akun tidak ditemukan. Silakan keluar lalu masuk kembali.",
+      };
+    }
   } catch {
     return { error: "Gagal menyimpan nama. Coba lagi." };
   }
@@ -120,7 +129,12 @@ export async function changePasswordAction(
 
   try {
     const passwordHash = await bcrypt.hash(parsed.data.newPassword, 10);
-    await updateUserPassword(userId, passwordHash);
+    const updated = await updateUserPassword(userId, passwordHash);
+    if (!updated) {
+      return {
+        error: "Akun tidak ditemukan. Silakan keluar lalu masuk kembali.",
+      };
+    }
   } catch {
     return { error: "Gagal mengganti password. Coba lagi." };
   }

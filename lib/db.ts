@@ -203,9 +203,10 @@ export async function upsertGoogleUser(data: {
   const email = data.email.toLowerCase();
   const existing = await getUserByEmail(email);
   if (existing) {
+    // Jangan timpa foto yang sudah diunggah user dengan foto Google.
     await db.execute({
-      sql: "UPDATE users SET name = ?, image = ? WHERE id = ?",
-      args: [data.name, data.image ?? existing.image, existing.id],
+      sql: "UPDATE users SET name = ?, image = COALESCE(image, ?) WHERE id = ?",
+      args: [data.name, data.image ?? null, existing.id],
     });
     return existing;
   }
@@ -228,39 +229,34 @@ export async function recordLogin(email: string): Promise<void> {
 export async function updateUserImage(
   id: number,
   image: string | null
-): Promise<void> {
+): Promise<boolean> {
   await initDb();
   const r = await db.execute({
     sql: "UPDATE users SET image = ? WHERE id = ?",
     args: [image, id],
   });
-  console.error(
-    "[dbg-updateUserImage] id=",
-    id,
-    "len=",
-    image?.length ?? "null",
-    "rowsAffected=",
-    r.rowsAffected
-  );
+  return r.rowsAffected > 0;
 }
 
-export async function updateUserName(id: number, name: string): Promise<void> {
+export async function updateUserName(id: number, name: string): Promise<boolean> {
   await initDb();
-  await db.execute({
+  const r = await db.execute({
     sql: "UPDATE users SET name = ? WHERE id = ?",
     args: [name, id],
   });
+  return r.rowsAffected > 0;
 }
 
 export async function updateUserPassword(
   id: number,
   passwordHash: string
-): Promise<void> {
+): Promise<boolean> {
   await initDb();
-  await db.execute({
+  const r = await db.execute({
     sql: "UPDATE users SET password_hash = ? WHERE id = ?",
     args: [passwordHash, id],
   });
+  return r.rowsAffected > 0;
 }
 
 // ---- tasks ----

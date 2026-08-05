@@ -72,23 +72,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // perubahan langsung terlihat tanpa perlu login ulang.
         const dbUser = await getUserById(Number(token.id));
         if (dbUser) {
-          console.error(
-            "[dbg-jwt] id=",
-            token.id,
-            "img=",
-            dbUser.image?.length ?? "null"
-          );
           token.name = dbUser.name;
           token.email = dbUser.email;
           token.image = dbUser.image;
-        } else {
-          console.error("[dbg-jwt] id=", token.id, "USER TIDAK DITEMUKAN");
         }
       }
       return token;
     },
     async session({ session, token }) {
-      if (token.id) session.user.id = token.id as string;
+      if (token.id) {
+        session.user.id = token.id as string;
+        session.user.name = (token.name as string | null) ?? session.user.name;
+        session.user.email = (token.email as string | null) ?? session.user.email;
+        session.user.image = (token.image as string | null) ?? null;
+      }
+      console.error(
+        "[dbg-session] user.image=",
+        session.user.image?.length ?? "null"
+      );
       return session;
     },
   },
