@@ -65,7 +65,7 @@ export function AccountSettings({
   >(changePasswordAction, {});
 
   return (
-    <div className="w-full max-w-md space-y-6">
+    <div className="mt-6 w-full max-w-md space-y-6">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-indigo-100/60 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/40">
         <SectionTitle
           title="Ganti nama"

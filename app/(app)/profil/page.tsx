@@ -128,12 +128,10 @@ export default async function ProfilePage() {
         </dl>
       </section>
 
-      <div className="mt-6 w-full">
-        <AccountSettings
-          initialName={user.name ?? "Teman"}
-          hasPassword={!isGoogle}
-        />
-      </div>
+      <AccountSettings
+        initialName={user.name ?? "Teman"}
+        hasPassword={!isGoogle}
+      />
     </div>
   );
 }
