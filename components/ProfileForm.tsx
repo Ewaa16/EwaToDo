@@ -16,8 +16,15 @@ function resizeImage(file: File): Promise<string> {
     reader.onerror = () => reject(new Error("File gagal dibaca."));
     reader.onload = () => {
       const img = new Image();
-      img.onerror = () => reject(new Error("Gambar gagal dibaca."));
+      const timer = setTimeout(() => {
+        reject(new Error("Gambar gagal diproses. Coba format JPG/PNG/WebP lain."));
+      }, 10_000);
+      img.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error("Gambar gagal dibaca. Coba file lain."));
+      };
       img.onload = () => {
+        clearTimeout(timer);
         let { width, height } = img;
         if (width > height && width > MAX_PX) {
           height = Math.round((height * MAX_PX) / width);
