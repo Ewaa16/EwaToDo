@@ -72,9 +72,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // perubahan langsung terlihat tanpa perlu login ulang.
         const dbUser = await getUserById(Number(token.id));
         if (dbUser) {
+          console.error(
+            "[dbg-jwt] id=",
+            token.id,
+            "img=",
+            dbUser.image?.length ?? "null"
+          );
           token.name = dbUser.name;
           token.email = dbUser.email;
           token.image = dbUser.image;
+        } else {
+          console.error("[dbg-jwt] id=", token.id, "USER TIDAK DITEMUKAN");
         }
       }
       return token;

@@ -230,10 +230,18 @@ export async function updateUserImage(
   image: string | null
 ): Promise<void> {
   await initDb();
-  await db.execute({
+  const r = await db.execute({
     sql: "UPDATE users SET image = ? WHERE id = ?",
     args: [image, id],
   });
+  console.error(
+    "[dbg-updateUserImage] id=",
+    id,
+    "len=",
+    image?.length ?? "null",
+    "rowsAffected=",
+    r.rowsAffected
+  );
 }
 
 export async function updateUserName(id: number, name: string): Promise<void> {

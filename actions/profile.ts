@@ -46,6 +46,7 @@ export async function updateProfileImageAction(
 ): Promise<ProfileActionState> {
   const userId = await requireUserId();
   const image = String(formData.get("image") ?? "");
+  console.error("[dbg-action] userId=", userId, "imageLen=", image.length);
 
   if (!DATA_URL_RE.test(image)) {
     return { error: "Format gambar tidak valid." };
