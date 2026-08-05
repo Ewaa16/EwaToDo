@@ -99,10 +99,37 @@ function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
+function Avatar({
+  image,
+  name,
+}: {
+  image?: string | null;
+  name?: string | null;
+}) {
+  const [err, setErr] = useState(false);
+  const initial = (name ?? "?").charAt(0).toUpperCase();
+
+  if (image && !err) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={image}
+        alt={name ?? "Foto profil"}
+        className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-100 dark:ring-indigo-500/40"
+        referrerPolicy="no-referrer"
+        onError={() => setErr(true)}
+      />
+    );
+  }
+  return (
+    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white">
+      {initial}
+    </span>
+  );
+}
+
 export function Navbar({ user, isOwner }: NavbarProps) {
   const pathname = usePathname();
-  const [imgError, setImgError] = useState(false);
-  const initial = (user.name ?? user.email ?? "?").charAt(0).toUpperCase();
   const items = isOwner ? [...NAV_ITEMS, AUDIENCE_ITEM] : NAV_ITEMS;
 
   return (
@@ -134,25 +161,17 @@ export function Navbar({ user, isOwner }: NavbarProps) {
 
           <div className="flex items-center gap-2.5">
             <ThemeToggle />
-            <div className="hidden items-center gap-2.5 sm:flex">
-              {user.image && !imgError ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={user.image}
-                  alt={user.name ?? "Foto profil"}
-                  className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-100 dark:ring-indigo-500/40"
-                  referrerPolicy="no-referrer"
-                  onError={() => setImgError(true)}
-                />
-              ) : (
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white">
-                  {initial}
-                </span>
-              )}
-              <span className="max-w-[10rem] truncate text-sm font-medium text-slate-700 dark:text-slate-300">
+            <Link
+              href="/profil"
+              aria-label="Profil saya"
+              title="Profil"
+              className="flex items-center gap-2.5 rounded-full transition-opacity hover:opacity-80"
+            >
+              <Avatar key={user.image ?? "none"} image={user.image} name={user.name} />
+              <span className="hidden max-w-[10rem] truncate text-sm font-medium text-slate-700 dark:text-slate-300 sm:inline">
                 {user.name}
               </span>
-            </div>
+            </Link>
             <form action={signOutAction}>
               <button
                 type="submit"

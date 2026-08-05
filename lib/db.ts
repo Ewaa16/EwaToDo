@@ -225,6 +225,17 @@ export async function recordLogin(email: string): Promise<void> {
   });
 }
 
+export async function updateUserImage(
+  id: number,
+  image: string | null
+): Promise<void> {
+  await initDb();
+  await db.execute({
+    sql: "UPDATE users SET image = ? WHERE id = ?",
+    args: [image, id],
+  });
+}
+
 // ---- tasks ----
 
 export type NewTask = {
