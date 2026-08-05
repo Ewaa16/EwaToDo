@@ -236,6 +236,25 @@ export async function updateUserImage(
   });
 }
 
+export async function updateUserName(id: number, name: string): Promise<void> {
+  await initDb();
+  await db.execute({
+    sql: "UPDATE users SET name = ? WHERE id = ?",
+    args: [name, id],
+  });
+}
+
+export async function updateUserPassword(
+  id: number,
+  passwordHash: string
+): Promise<void> {
+  await initDb();
+  await db.execute({
+    sql: "UPDATE users SET password_hash = ? WHERE id = ?",
+    args: [passwordHash, id],
+  });
+}
+
 // ---- tasks ----
 
 export type NewTask = {

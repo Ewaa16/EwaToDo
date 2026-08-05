@@ -39,6 +39,22 @@ export function isOverdue(dueDate: string): boolean {
   return dueDate < localDateNow();
 }
 
+export function formatDateTimeLocal(dt: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})(?::(\d{2}))?/.exec(dt);
+  if (!m) return dt;
+  const [, y, mo, d, h, mi] = m;
+  const date = new Date(`${y}-${mo}-${d}T${h}:${mi}:00`);
+  if (Number.isNaN(date.getTime())) return dt;
+  return `${date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })} · ${date.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}`;
+}
+
 function addDaysJakarta(iso: string, n: number): string {
   const d = new Date(`${iso}T00:00:00Z`);
   if (Number.isNaN(d.getTime())) return iso;
