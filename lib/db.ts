@@ -388,6 +388,22 @@ export async function getUpcomingTasks(
   return r.rows as unknown as TaskRow[];
 }
 
+export async function getMonthTasks(
+  userId: number,
+  year: number,
+  month: number
+): Promise<TaskRow[]> {
+  await initDb();
+  const prefix = `${year}-${String(month).padStart(2, "0")}`;
+  const r = await db.execute({
+    sql: `SELECT * FROM tasks
+       WHERE user_id = ? AND due_date IS NOT NULL AND due_date LIKE ?
+       ORDER BY due_date ASC, created_at ASC`,
+    args: [userId, `${prefix}-%`],
+  });
+  return r.rows as unknown as TaskRow[];
+}
+
 export type DashboardSummary = {
   todayDue: number;
   todayCompleted: number;

@@ -1,25 +1,38 @@
 import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { StatsChart } from "@/components/StatsChart";
+import { TaskCalendar } from "@/components/TaskCalendar";
 import {
   getCurrentStreak,
   getDashboardSummary,
+  getMonthTasks,
   getWeeklyStats,
+  localToday,
 } from "@/lib/db";
+import { parseMonthKey } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Statistik" };
 
-export default async function StatsPage() {
+export default async function StatsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>;
+}) {
   const session = await auth();
   const userId = Number(session!.user!.id);
+
+  const params = await searchParams;
+  const monthRef = parseMonthKey(params.month);
 
   const statsPromise = getWeeklyStats(userId, 7);
   const summaryPromise = getDashboardSummary(userId);
   const streakPromise = getCurrentStreak(userId);
-  const [stats, summary, streak] = await Promise.all([
+  const monthTasksPromise = getMonthTasks(userId, monthRef.year, monthRef.month);
+  const [stats, summary, streak, monthTasks] = await Promise.all([
     statsPromise,
     summaryPromise,
     streakPromise,
+    monthTasksPromise,
   ]);
 
   const weekTotal = stats.reduce((sum, d) => sum + d.completed, 0);
@@ -36,6 +49,14 @@ export default async function StatsPage() {
           Pantau seberapa produktif kamu dalam seminggu terakhir.
         </p>
       </div>
+
+      <TaskCalendar
+        tasks={monthTasks}
+        year={monthRef.year}
+        month={monthRef.month}
+        today={localToday()}
+        baseHref="/stats"
+      />
 
       <section className="rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 p-6 shadow-sm dark:border-orange-500/30 dark:from-orange-500/10 dark:to-amber-500/10">
         <div className="flex items-center gap-4">

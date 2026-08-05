@@ -3,17 +3,21 @@ import { auth } from "@/auth";
 import { Confetti } from "@/components/Confetti";
 import { InstallApp } from "@/components/InstallApp";
 import { RealtimeClock } from "@/components/RealtimeClock";
+import { TaskCalendar } from "@/components/TaskCalendar";
 import { TaskItem } from "@/components/TaskItem";
 import {
   countDownloads,
   getDashboardSummary,
+  getMonthTasks,
   getTodayTasks,
   getUpcomingTasks,
+  localToday,
 } from "@/lib/db";
 import {
   formatDueLabel,
   greetingByHour,
   isOverdue,
+  parseMonthKey,
   todayLabel,
   PRIORITY_META,
 } from "@/lib/format";
@@ -49,17 +53,26 @@ function StatCard({
   );
 }
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>;
+}) {
   const session = await auth();
   const userId = Number(session!.user!.id);
   const name = session!.user!.name ?? "Teman";
 
-  const [summary, todayTasks, upcoming, downloadCount] = await Promise.all([
-    getDashboardSummary(userId),
-    getTodayTasks(userId),
-    getUpcomingTasks(userId, 3),
-    countDownloads(),
-  ]);
+  const params = await searchParams;
+  const monthRef = parseMonthKey(params.month);
+
+  const [summary, todayTasks, upcoming, downloadCount, monthTasks] =
+    await Promise.all([
+      getDashboardSummary(userId),
+      getTodayTasks(userId),
+      getUpcomingTasks(userId, 3),
+      countDownloads(),
+      getMonthTasks(userId, monthRef.year, monthRef.month),
+    ]);
 
   const { text, emoji } = greetingByHour();
 
@@ -189,6 +202,15 @@ export default async function HomePage() {
           </ul>
         )}
       </section>
+
+      {/* Kalender tugas */}
+      <TaskCalendar
+        tasks={monthTasks}
+        year={monthRef.year}
+        month={monthRef.month}
+        today={localToday()}
+        baseHref="/"
+      />
 
       {/* Pasang aplikasi */}
       <InstallApp downloadCount={downloadCount} />

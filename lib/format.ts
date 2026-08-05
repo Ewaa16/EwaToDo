@@ -78,3 +78,22 @@ export function todayLabel(): string {
     timeZone: JAKARTA_TZ,
   }).format(new Date());
 }
+
+export type MonthRef = { year: number; month: number };
+
+export function monthKey(year: number, month: number): string {
+  return `${year}-${String(month).padStart(2, "0")}`;
+}
+
+export function parseMonthKey(s?: string): MonthRef {
+  const t = jakartaParts();
+  if (!s) return { year: t.y, month: t.mo };
+  const m = /^(\d{4})-(\d{2})$/.exec(s);
+  if (!m) return { year: t.y, month: t.mo };
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  if (month < 1 || month > 12 || year < 2000 || year > 2100) {
+    return { year: t.y, month: t.mo };
+  }
+  return { year, month };
+}
